@@ -37,24 +37,24 @@ function FileTreeNode({
   // Color coding based on type
   const nameColor =
     item.type === "folder"
-      ? "text-terminal-cyan"
+      ? "text-accent-cyan"
       : item.name.endsWith(".ts") || item.name.endsWith(".tsx")
-        ? "text-terminal-green"
+        ? "text-accent-green"
         : item.name.endsWith(".json") || item.name.endsWith(".yaml")
-          ? "text-terminal-amber"
-          : "text-gray-700 dark:text-terminal-text";
+          ? "text-accent-yellow"
+          : "text-light-text dark:text-text-primary";
 
   return (
     <>
       <div className="flex items-start font-mono text-sm leading-relaxed">
-        <span className="text-gray-400 dark:text-terminal-text-muted whitespace-pre select-none">
+        <span className="text-light-text-muted dark:text-text-muted whitespace-pre select-none">
           {parentPrefixes}{connector}
         </span>
         <span className={nameColor}>
           {item.type === "folder" ? `${item.name}/` : item.name}
         </span>
         {item.comment && (
-          <span className="text-gray-400 dark:text-terminal-text-muted ml-3 text-xs">
+          <span className="text-light-text-muted dark:text-text-muted ml-3 text-xs">
             # {item.comment}
           </span>
         )}
@@ -75,19 +75,19 @@ function FileTreeNode({
 export function FileTree({ heading, items }: FileTreeProps) {
   return (
     <section>
-      <h2 className="font-mono text-xl md:text-2xl font-semibold text-gray-900 dark:text-terminal-text mb-6">
+      <h2 className="font-mono text-xl md:text-2xl font-semibold text-light-text dark:text-text-primary mb-6">
         {heading}
       </h2>
 
       <div className="terminal-window">
         <div className="terminal-titlebar">
           <TerminalDots />
-          <span className="font-mono text-xs text-gray-500 dark:text-terminal-text-muted ml-2">
+          <span className="font-mono text-xs text-light-text-muted dark:text-text-muted ml-2">
             ~/your-repo
           </span>
         </div>
         <div className="terminal-content font-mono">
-          <div className="text-sm text-terminal-cyan mb-2">.</div>
+          <div className="text-sm text-accent-yellow mb-2">.</div>
           <div className="space-y-0.5">
             {items.map((item, index) => (
               <FileTreeNode

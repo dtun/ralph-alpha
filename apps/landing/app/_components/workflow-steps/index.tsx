@@ -13,7 +13,7 @@ export function WorkflowSteps({ steps }: WorkflowStepsProps) {
 
   return (
     <section>
-      <h2 className="font-mono text-xl md:text-2xl font-semibold text-gray-900 dark:text-terminal-text mb-8 text-center">
+      <h2 className="font-mono text-xl md:text-2xl font-semibold text-light-text dark:text-text-primary mb-8 text-center">
         How It Works
       </h2>
 

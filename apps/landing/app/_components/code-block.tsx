@@ -27,18 +27,18 @@ export function CodeBlock({
   const displayName = filename || language || "code";
 
   const codeContent = (
-    <pre className={`overflow-x-auto ${bare ? "p-3 bg-gray-50 dark:bg-terminal-bg-subtle rounded border border-gray-200 dark:border-terminal-border" : "p-4 bg-white dark:bg-terminal-bg"}`}>
+    <pre className={`overflow-x-auto ${bare ? "p-3 bg-light-bg-subtle dark:bg-dark-bg-subtle rounded border border-light-border dark:border-dark-border" : "p-4 bg-white dark:bg-dark-bg"}`}>
       <code className="font-mono text-sm leading-relaxed">
         {showLineNumbers
           ? lines.map((line, i) => (
               <div key={i} className="flex">
-                <span className="select-none w-8 text-right pr-4 text-gray-400 dark:text-terminal-text-muted">
+                <span className="select-none w-8 text-right pr-4 text-light-text-muted dark:text-text-muted">
                   {i + 1}
                 </span>
-                <span className="text-gray-800 dark:text-terminal-text">{line}</span>
+                <span className="text-light-text dark:text-text-primary">{line}</span>
               </div>
             ))
-          : <span className="text-gray-800 dark:text-terminal-text">{code}</span>
+          : <span className="text-light-text dark:text-text-primary">{code}</span>
         }
       </code>
     </pre>
@@ -53,7 +53,7 @@ export function CodeBlock({
       {/* Terminal title bar */}
       <div className="terminal-titlebar">
         <TerminalDots />
-        <span className="font-mono text-xs text-gray-500 dark:text-terminal-text-muted ml-2">
+        <span className="font-mono text-xs text-light-text-muted dark:text-text-muted ml-2">
           {displayName}
         </span>
       </div>

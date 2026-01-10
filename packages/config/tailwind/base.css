@@ -1,25 +1,30 @@
 /* Custom theme tokens using Tailwind v4's CSS-first approach */
+/* Developer TUI Theme - Yellow accent inspired by Wes Bos & The Simpsons */
 @theme {
-  /* Brand Colors - Shifted to a more terminal/dev-tool feel */
-  --color-brand-50: oklch(0.97 0.01 250);
-  --color-brand-100: oklch(0.93 0.02 250);
-  --color-brand-500: oklch(0.55 0.15 250);
-  --color-brand-600: oklch(0.45 0.15 250);
-  --color-brand-700: oklch(0.35 0.15 250);
+  /* Custom Dark Background Colors */
+  --color-dark-bg: #0f1419;             /* Main background - dark blue-gray */
+  --color-dark-bg-subtle: #1a1f2e;      /* Panels/sidebars */
+  --color-dark-bg-elevated: #242936;    /* Elevated surfaces */
+  --color-dark-border: #2d3748;         /* Borders */
 
-  /* Terminal-inspired accent colors */
-  --color-terminal-green: oklch(0.72 0.17 145);
-  --color-terminal-cyan: oklch(0.75 0.12 195);
-  --color-terminal-amber: oklch(0.8 0.15 85);
-  --color-terminal-red: oklch(0.65 0.2 25);
-  --color-terminal-yellow: oklch(0.85 0.15 90);
+  /* Accent Colors - Yellow as the hero */
+  --color-accent-yellow: #ffc600;       /* PRIMARY - The Simpsons yellow (Wes Bos nod) */
+  --color-accent-cyan: #64d9ff;         /* Bright cyan for code/folders */
+  --color-accent-green: #50fa7b;        /* Success, strings */
+  --color-accent-pink: #ff6b9d;         /* Errors, warnings */
+  --color-accent-orange: #ffb86c;       /* Secondary accent */
 
-  /* Terminal surface colors */
-  --color-terminal-bg: oklch(0.13 0.01 250);
-  --color-terminal-bg-subtle: oklch(0.16 0.01 250);
-  --color-terminal-border: oklch(0.28 0.02 250);
-  --color-terminal-text: oklch(0.9 0.01 250);
-  --color-terminal-text-muted: oklch(0.65 0.01 250);
+  /* Text Colors */
+  --color-text-primary: #e6edf3;        /* Primary text */
+  --color-text-muted: #8b949e;          /* Muted text */
+  --color-text-subtle: #6e7681;         /* Very subtle text */
+
+  /* Light mode - Clean and professional */
+  --color-light-bg: #ffffff;            /* Pure white background */
+  --color-light-bg-subtle: #f6f8fa;     /* Subtle panels */
+  --color-light-border: #d0d7de;        /* Light borders */
+  --color-light-text: #24292f;          /* Dark text */
+  --color-light-text-muted: #57606a;    /* Muted text */
 
   /* Typography - IBM Plex Mono as display font for TUI feel */
   --font-sans: "Inter", system-ui, sans-serif;

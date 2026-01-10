@@ -42,23 +42,23 @@ export function StepDetailPanel({
     <div className="terminal-window mt-8">
       <div className="terminal-titlebar">
         <TerminalDots />
-        <span className="font-mono text-xs text-gray-500 dark:text-terminal-text-muted ml-2">
+        <span className="font-mono text-xs text-light-text-muted dark:text-text-muted ml-2">
           step-{stepNumber}.md
         </span>
       </div>
 
       <div className="terminal-content">
         <div className="flex items-center gap-3 mb-4">
-          <span className="font-mono text-sm text-terminal-amber">
+          <span className="font-mono text-sm text-accent-yellow">
             [{stepNumber}]
           </span>
-          <h3 className="font-mono text-lg font-semibold text-gray-900 dark:text-terminal-text">
+          <h3 className="font-mono text-lg font-semibold text-light-text dark:text-text-primary">
             {step.label}
           </h3>
         </div>
 
-        <p className="text-base text-gray-700 dark:text-terminal-text mb-3">{step.description}</p>
-        <p className="text-sm text-gray-600 dark:text-terminal-text-muted mb-6">{step.details}</p>
+        <p className="text-base text-light-text dark:text-text-primary mb-3">{step.description}</p>
+        <p className="text-sm text-light-text-muted dark:text-text-muted mb-6">{step.details}</p>
 
         {step.code && (
           <div className="mb-6">
@@ -66,15 +66,15 @@ export function StepDetailPanel({
           </div>
         )}
 
-        <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-terminal-border">
+        <div className="flex justify-between pt-4 border-t border-light-border dark:border-dark-border">
           <button
             onClick={onPrevious}
             disabled={!hasPrevious}
             className={`
               font-mono text-sm px-4 py-2 rounded border transition-colors duration-150
               ${hasPrevious
-                ? "border-gray-300 dark:border-terminal-border text-gray-700 dark:text-terminal-text hover:border-terminal-cyan hover:text-terminal-cyan"
-                : "opacity-40 cursor-not-allowed border-gray-200 dark:border-terminal-border text-gray-400 dark:text-terminal-text-muted"
+                ? "border-light-border dark:border-dark-border text-light-text dark:text-text-primary hover:border-accent-yellow hover:text-accent-yellow"
+                : "opacity-40 cursor-not-allowed border-light-border dark:border-dark-border text-light-text-muted dark:text-text-muted"
               }
             `}
           >
@@ -86,8 +86,8 @@ export function StepDetailPanel({
             className={`
               font-mono text-sm px-4 py-2 rounded border transition-colors duration-150
               ${hasNext
-                ? "border-terminal-cyan bg-terminal-cyan/10 text-terminal-cyan hover:bg-terminal-cyan/20"
-                : "opacity-40 cursor-not-allowed border-gray-200 dark:border-terminal-border text-gray-400 dark:text-terminal-text-muted"
+                ? "border-accent-yellow bg-accent-yellow/10 text-accent-yellow hover:bg-accent-yellow/20"
+                : "opacity-40 cursor-not-allowed border-light-border dark:border-dark-border text-light-text-muted dark:text-text-muted"
               }
             `}
           >

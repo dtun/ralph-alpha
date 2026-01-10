@@ -29,8 +29,8 @@ export function StepIndicator({
             font-mono font-semibold text-sm transition-all duration-150 border
             ${
               isActive
-                ? "bg-terminal-cyan/10 text-terminal-cyan border-terminal-cyan scale-105"
-                : "bg-gray-100 dark:bg-terminal-bg-subtle text-gray-600 dark:text-terminal-text-muted border-gray-200 dark:border-terminal-border group-hover:border-terminal-cyan group-hover:text-terminal-cyan"
+                ? "bg-accent-yellow/10 text-accent-yellow border-accent-yellow scale-105"
+                : "bg-light-bg-subtle dark:bg-dark-bg-subtle text-light-text-muted dark:text-text-muted border-light-border dark:border-dark-border group-hover:border-accent-yellow group-hover:text-accent-yellow"
             }
           `}
         >
@@ -41,8 +41,8 @@ export function StepIndicator({
             font-mono text-xs font-medium transition-colors duration-150
             ${
               isActive
-                ? "text-terminal-cyan"
-                : "text-gray-500 dark:text-terminal-text-muted group-hover:text-gray-700 dark:group-hover:text-terminal-text"
+                ? "text-accent-yellow"
+                : "text-light-text-muted dark:text-text-muted group-hover:text-light-text dark:group-hover:text-text-primary"
             }
           `}
         >
