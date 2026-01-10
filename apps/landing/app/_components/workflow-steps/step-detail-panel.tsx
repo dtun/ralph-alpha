@@ -20,6 +20,16 @@ interface StepDetailPanelProps {
   hasNext: boolean;
 }
 
+function TerminalDots() {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="w-3 h-3 rounded-full bg-terminal-red" />
+      <div className="w-3 h-3 rounded-full bg-terminal-yellow" />
+      <div className="w-3 h-3 rounded-full bg-terminal-green" />
+    </div>
+  );
+}
+
 export function StepDetailPanel({
   step,
   stepNumber,
@@ -29,40 +39,61 @@ export function StepDetailPanel({
   hasNext,
 }: StepDetailPanelProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 md:p-8 mt-8">
-      <div className="flex items-center gap-3 mb-4">
-        <span className="bg-brand-100 dark:bg-brand-700/30 text-brand-600 dark:text-brand-100 text-sm font-semibold px-3 py-1 rounded-full">
-          Step {stepNumber}
+    <div className="terminal-window mt-8">
+      <div className="terminal-titlebar">
+        <TerminalDots />
+        <span className="font-mono text-xs text-gray-500 dark:text-terminal-text-muted ml-2">
+          step-{stepNumber}.md
         </span>
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{step.label}</h3>
       </div>
 
-      <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">{step.description}</p>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">{step.details}</p>
-
-      {step.code && (
-        <div className="mb-6">
-          <CodeBlock code={step.code} language={step.codeLanguage} />
+      <div className="terminal-content">
+        <div className="flex items-center gap-3 mb-4">
+          <span className="font-mono text-sm text-terminal-amber">
+            [{stepNumber}]
+          </span>
+          <h3 className="font-mono text-lg font-semibold text-gray-900 dark:text-terminal-text">
+            {step.label}
+          </h3>
         </div>
-      )}
 
-      <div className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={onPrevious}
-          disabled={!hasPrevious}
-          className={!hasPrevious ? "opacity-50 cursor-not-allowed" : ""}
-        >
-          ← Previous
-        </Button>
-        <Button
-          variant="primary"
-          onClick={onNext}
-          disabled={!hasNext}
-          className={!hasNext ? "opacity-50 cursor-not-allowed" : ""}
-        >
-          Next →
-        </Button>
+        <p className="text-base text-gray-700 dark:text-terminal-text mb-3">{step.description}</p>
+        <p className="text-sm text-gray-600 dark:text-terminal-text-muted mb-6">{step.details}</p>
+
+        {step.code && (
+          <div className="mb-6">
+            <CodeBlock code={step.code} language={step.codeLanguage} />
+          </div>
+        )}
+
+        <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-terminal-border">
+          <button
+            onClick={onPrevious}
+            disabled={!hasPrevious}
+            className={`
+              font-mono text-sm px-4 py-2 rounded border transition-colors duration-150
+              ${hasPrevious
+                ? "border-gray-300 dark:border-terminal-border text-gray-700 dark:text-terminal-text hover:border-terminal-cyan hover:text-terminal-cyan"
+                : "opacity-40 cursor-not-allowed border-gray-200 dark:border-terminal-border text-gray-400 dark:text-terminal-text-muted"
+              }
+            `}
+          >
+            {"<--"} Previous
+          </button>
+          <button
+            onClick={onNext}
+            disabled={!hasNext}
+            className={`
+              font-mono text-sm px-4 py-2 rounded border transition-colors duration-150
+              ${hasNext
+                ? "border-terminal-cyan bg-terminal-cyan/10 text-terminal-cyan hover:bg-terminal-cyan/20"
+                : "opacity-40 cursor-not-allowed border-gray-200 dark:border-terminal-border text-gray-400 dark:text-terminal-text-muted"
+              }
+            `}
+          >
+            Next {"-->"}
+          </button>
+        </div>
       </div>
     </div>
   );

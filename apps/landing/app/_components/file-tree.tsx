@@ -10,29 +10,63 @@ interface FileTreeProps {
   items: FileTreeItem[];
 }
 
+function TerminalDots() {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="w-3 h-3 rounded-full bg-terminal-red" />
+      <div className="w-3 h-3 rounded-full bg-terminal-yellow" />
+      <div className="w-3 h-3 rounded-full bg-terminal-green" />
+    </div>
+  );
+}
+
 function FileTreeNode({
   item,
   depth = 0,
+  isLast = false,
+  parentPrefixes = "",
 }: {
   item: FileTreeItem;
   depth?: number;
+  isLast?: boolean;
+  parentPrefixes?: string;
 }) {
-  const indent = "│   ".repeat(depth);
-  const prefix = item.type === "folder" ? "📁" : "📄";
+  const connector = isLast ? "└── " : "├── ";
+  const childPrefix = parentPrefixes + (isLast ? "    " : "│   ");
+
+  // Color coding based on type
+  const nameColor =
+    item.type === "folder"
+      ? "text-terminal-cyan"
+      : item.name.endsWith(".ts") || item.name.endsWith(".tsx")
+        ? "text-terminal-green"
+        : item.name.endsWith(".json") || item.name.endsWith(".yaml")
+          ? "text-terminal-amber"
+          : "text-gray-700 dark:text-terminal-text";
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <span className="text-gray-400 dark:text-gray-500 font-mono text-sm whitespace-pre">
-          {indent}├── {prefix}
+      <div className="flex items-start font-mono text-sm leading-relaxed">
+        <span className="text-gray-400 dark:text-terminal-text-muted whitespace-pre select-none">
+          {parentPrefixes}{connector}
         </span>
-        <span className="font-mono text-sm text-gray-800 dark:text-gray-200">{item.name}</span>
+        <span className={nameColor}>
+          {item.type === "folder" ? `${item.name}/` : item.name}
+        </span>
         {item.comment && (
-          <span className="text-gray-400 dark:text-gray-500 text-sm ml-2"># {item.comment}</span>
+          <span className="text-gray-400 dark:text-terminal-text-muted ml-3 text-xs">
+            # {item.comment}
+          </span>
         )}
       </div>
       {item.children?.map((child, index) => (
-        <FileTreeNode key={index} item={child} depth={depth + 1} />
+        <FileTreeNode
+          key={index}
+          item={child}
+          depth={depth + 1}
+          isLast={index === item.children!.length - 1}
+          parentPrefixes={childPrefix}
+        />
       ))}
     </>
   );
@@ -41,16 +75,28 @@ function FileTreeNode({
 export function FileTree({ heading, items }: FileTreeProps) {
   return (
     <section>
-      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+      <h2 className="font-mono text-xl md:text-2xl font-semibold text-gray-900 dark:text-terminal-text mb-6">
         {heading}
       </h2>
 
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 md:p-8 border border-gray-200 dark:border-gray-700">
-        <div className="font-mono text-sm text-brand-600 dark:text-brand-100 mb-4">your-repo/</div>
-        <div className="space-y-1">
-          {items.map((item, index) => (
-            <FileTreeNode key={index} item={item} />
-          ))}
+      <div className="terminal-window">
+        <div className="terminal-titlebar">
+          <TerminalDots />
+          <span className="font-mono text-xs text-gray-500 dark:text-terminal-text-muted ml-2">
+            ~/your-repo
+          </span>
+        </div>
+        <div className="terminal-content font-mono">
+          <div className="text-sm text-terminal-cyan mb-2">.</div>
+          <div className="space-y-0.5">
+            {items.map((item, index) => (
+              <FileTreeNode
+                key={index}
+                item={item}
+                isLast={index === items.length - 1}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

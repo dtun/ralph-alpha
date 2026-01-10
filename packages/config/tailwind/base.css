@@ -1,15 +1,30 @@
 /* Custom theme tokens using Tailwind v4's CSS-first approach */
 @theme {
-  /* Colors */
+  /* Brand Colors - Shifted to a more terminal/dev-tool feel */
   --color-brand-50: oklch(0.97 0.01 250);
   --color-brand-100: oklch(0.93 0.02 250);
   --color-brand-500: oklch(0.55 0.15 250);
   --color-brand-600: oklch(0.45 0.15 250);
   --color-brand-700: oklch(0.35 0.15 250);
 
-  /* Typography */
+  /* Terminal-inspired accent colors */
+  --color-terminal-green: oklch(0.72 0.17 145);
+  --color-terminal-cyan: oklch(0.75 0.12 195);
+  --color-terminal-amber: oklch(0.8 0.15 85);
+  --color-terminal-red: oklch(0.65 0.2 25);
+  --color-terminal-yellow: oklch(0.85 0.15 90);
+
+  /* Terminal surface colors */
+  --color-terminal-bg: oklch(0.13 0.01 250);
+  --color-terminal-bg-subtle: oklch(0.16 0.01 250);
+  --color-terminal-border: oklch(0.28 0.02 250);
+  --color-terminal-text: oklch(0.9 0.01 250);
+  --color-terminal-text-muted: oklch(0.65 0.01 250);
+
+  /* Typography - IBM Plex Mono as display font for TUI feel */
   --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
 }
 
 /* Base layer customizations */

@@ -9,32 +9,57 @@ interface SetupChecklistProps {
   steps: SetupStep[];
 }
 
+function TerminalDots() {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="w-3 h-3 rounded-full bg-terminal-red" />
+      <div className="w-3 h-3 rounded-full bg-terminal-yellow" />
+      <div className="w-3 h-3 rounded-full bg-terminal-green" />
+    </div>
+  );
+}
+
 export function SetupChecklist({ heading, steps }: SetupChecklistProps) {
   return (
     <section>
-      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+      <h2 className="font-mono text-xl md:text-2xl font-semibold text-gray-900 dark:text-terminal-text mb-6">
         {heading}
       </h2>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
-        {steps.map((step, index) => (
-          <div key={index} className="flex gap-4 p-5">
-            <div className="flex-shrink-0 w-7 h-7 bg-brand-100 dark:bg-brand-700/30 text-brand-600 dark:text-brand-100 rounded-full flex items-center justify-center font-semibold text-sm">
-              {index + 1}
+      <div className="terminal-window">
+        <div className="terminal-titlebar">
+          <TerminalDots />
+          <span className="font-mono text-xs text-gray-500 dark:text-terminal-text-muted ml-2">
+            setup.sh
+          </span>
+        </div>
+        <div className="divide-y divide-gray-100 dark:divide-terminal-border">
+          {steps.map((step, index) => (
+            <div key={index} className="flex gap-4 p-5 bg-white dark:bg-terminal-bg">
+              <div className="flex-shrink-0 font-mono text-sm text-terminal-amber font-medium">
+                [{index + 1}]
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-mono font-medium text-gray-900 dark:text-terminal-text">
+                  {step.title}
+                </h3>
+                {step.description && (
+                  <p className="text-gray-500 dark:text-terminal-text-muted text-sm mt-1">
+                    {step.description}
+                  </p>
+                )}
+                {step.command && (
+                  <div className="mt-3 px-3 py-2 bg-gray-50 dark:bg-terminal-bg-subtle rounded border border-gray-200 dark:border-terminal-border">
+                    <code className="font-mono text-sm text-gray-700 dark:text-terminal-text flex items-center gap-2">
+                      <span className="text-terminal-green select-none">$</span>
+                      <span>{step.command}</span>
+                    </code>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 dark:text-white">{step.title}</h3>
-              {step.description && (
-                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{step.description}</p>
-              )}
-              {step.command && (
-                <code className="block mt-2 px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg font-mono text-sm text-gray-700 dark:text-gray-300">
-                  {step.command}
-                </code>
-              )}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

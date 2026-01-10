@@ -6,14 +6,39 @@ interface ComponentCardProps {
   description: string;
 }
 
+function TerminalDots() {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="w-3 h-3 rounded-full bg-terminal-red" />
+      <div className="w-3 h-3 rounded-full bg-terminal-yellow" />
+      <div className="w-3 h-3 rounded-full bg-terminal-green" />
+    </div>
+  );
+}
+
 export function ComponentCard({ icon, title, description }: ComponentCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-lg transition-all duration-200">
-      <div className="w-12 h-12 bg-brand-100 dark:bg-brand-700/30 rounded-lg flex items-center justify-center text-brand-600 dark:text-brand-100 mb-4">
-        {icon}
+    <div className="terminal-window group hover:border-terminal-cyan dark:hover:border-terminal-cyan transition-colors duration-150">
+      {/* Title bar with macOS dots */}
+      <div className="terminal-titlebar">
+        <TerminalDots />
+        <span className="font-mono text-xs text-gray-500 dark:text-terminal-text-muted ml-2">
+          {title.toLowerCase().replace(/\s+/g, "-")}.tsx
+        </span>
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
-      <p className="text-gray-600 dark:text-gray-400">{description}</p>
+
+      {/* Card content */}
+      <div className="terminal-content">
+        <div className="w-10 h-10 bg-gray-100 dark:bg-terminal-bg-subtle rounded flex items-center justify-center text-terminal-cyan mb-4">
+          {icon}
+        </div>
+        <h3 className="font-mono text-base font-semibold text-gray-900 dark:text-terminal-text mb-2">
+          {title}
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-terminal-text-muted leading-relaxed">
+          {description}
+        </p>
+      </div>
     </div>
   );
 }

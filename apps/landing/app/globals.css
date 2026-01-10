@@ -3,8 +3,82 @@
 
 @source "../../packages/ui/src";
 
+/* IBM Plex Mono font */
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("https://fonts.gstatic.com/s/ibmplexmono/v19/-F63fjptAgt5VM-kVkqdyU8n5iQ.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("https://fonts.gstatic.com/s/ibmplexmono/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJ.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("https://fonts.gstatic.com/s/ibmplexmono/v19/-F6qfjptAgt5VM-kVkqdyU8n3vwO.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("https://fonts.gstatic.com/s/ibmplexmono/v19/-F6qfjptAgt5VM-kVkqdyU8n3oQP.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gray-50 text-gray-900 dark:bg-terminal-bg dark:text-terminal-text;
+  }
+}
+
+/* TUI utility classes */
+@layer components {
+  /* Terminal window frame with macOS-style dots */
+  .terminal-window {
+    @apply rounded-md border border-gray-200 dark:border-terminal-border overflow-hidden;
+  }
+
+  .terminal-titlebar {
+    @apply flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-terminal-bg-subtle border-b border-gray-200 dark:border-terminal-border;
+  }
+
+  .terminal-dots {
+    @apply flex items-center gap-1.5;
+  }
+
+  .terminal-dot {
+    @apply w-3 h-3 rounded-full;
+  }
+
+  .terminal-dot-red {
+    @apply bg-terminal-red;
+  }
+
+  .terminal-dot-yellow {
+    @apply bg-terminal-yellow;
+  }
+
+  .terminal-dot-green {
+    @apply bg-terminal-green;
+  }
+
+  .terminal-content {
+    @apply p-4 bg-white dark:bg-terminal-bg;
+  }
+
+  /* Monospace display text */
+  .font-display {
+    font-family: var(--font-display);
   }
 }
