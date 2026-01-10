@@ -1,0 +1,21 @@
+/* Custom theme tokens using Tailwind v4's CSS-first approach */
+@theme {
+  /* Colors */
+  --color-brand-50: oklch(0.97 0.01 250);
+  --color-brand-100: oklch(0.93 0.02 250);
+  --color-brand-500: oklch(0.55 0.15 250);
+  --color-brand-600: oklch(0.45 0.15 250);
+  --color-brand-700: oklch(0.35 0.15 250);
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Base layer customizations */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
