@@ -1,5 +1,3 @@
-import { WorkflowStep } from "../_components/workflow-steps/step-detail-panel";
-
 export const headerContent = {
   title: "Multiplayer AI Coding",
   subtitle: "Your team's laptops. One AI-powered fleet.",
@@ -34,7 +32,17 @@ export const componentsContent = [
   },
 ];
 
-export const workflowSteps: WorkflowStep[] = [
+// Unified workflow steps with player associations
+export interface UnifiedStep {
+  label: string;
+  description: string;
+  details: string;
+  code?: string;
+  codeLanguage?: string;
+  playerIds: string[]; // Which players are active for this step
+}
+
+export const unifiedSteps: UnifiedStep[] = [
   {
     label: "Trigger",
     description: "Someone kicks off an AI task",
@@ -43,19 +51,21 @@ export const workflowSteps: WorkflowStep[] = [
     code: `gh workflow run ai-pair.yml \\
   -f task="Add input validation"`,
     codeLanguage: "bash",
+    playerIds: ["actions"],
   },
   {
-    label: "Runner Picks Up",
-    description: "Next available machine claims the job",
+    label: "Runner Claims",
+    description: "Next available machine picks up the job",
     details:
       "Whichever team member's self-hosted runner is idle picks up the work. Could be anyone's laptop.",
     code: `runs-on: self-hosted
 # Any registered runner can claim this`,
     codeLanguage: "yaml",
+    playerIds: ["runners"],
   },
   {
-    label: "Ralph Loop",
-    description: "Claude Code iterates on the task",
+    label: "AI Codes",
+    description: "Claude iterates through the task",
     details:
       "The ralph.sh script runs Claude Code in a loop: plan → code → test → reflect. Repeats until done or stuck.",
     code: `for i in $(seq 1 $MAX_ITERATIONS); do
@@ -63,22 +73,18 @@ export const workflowSteps: WorkflowStep[] = [
   npm test
 done`,
     codeLanguage: "bash",
+    playerIds: ["ralph", "claude"],
   },
   {
-    label: "PR Created",
-    description: "Changes pushed, PR opened",
+    label: "PR & Review",
+    description: "Changes pushed, team reviews",
     details:
-      "All changes committed to a feature branch. GitHub CLI creates a PR automatically with context about the task.",
+      "All changes committed to a feature branch. GitHub CLI creates a PR automatically with context about the task. The whole team can review the AI's work, request changes, or approve.",
     code: `gh pr create \\
   --title "AI: $TASK" \\
   --base main`,
     codeLanguage: "bash",
-  },
-  {
-    label: "Team Reviews",
-    description: "Humans approve and merge",
-    details:
-      "The whole team can see the PR, review the AI's work, request changes, or approve. AI can't merge—only humans can.",
+    playerIds: ["actions"],
   },
 ];
 

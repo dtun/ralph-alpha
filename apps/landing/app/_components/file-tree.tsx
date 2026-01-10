@@ -10,16 +10,6 @@ interface FileTreeProps {
   items: FileTreeItem[];
 }
 
-function TerminalDots() {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600" />
-      <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600" />
-      <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600" />
-    </div>
-  );
-}
-
 function FileTreeNode({
   item,
   depth = 0,
@@ -79,24 +69,16 @@ export function FileTree({ heading, items }: FileTreeProps) {
         {heading}
       </h2>
 
-      <div className="terminal-window">
-        <div className="terminal-titlebar">
-          <TerminalDots />
-          <span className="font-mono text-xs text-light-text-muted dark:text-text-muted ml-2">
-            ~/your-repo
-          </span>
-        </div>
-        <div className="terminal-content font-mono">
-          <div className="text-sm text-accent-yellow mb-2">.</div>
-          <div className="space-y-0.5">
-            {items.map((item, index) => (
-              <FileTreeNode
-                key={index}
-                item={item}
-                isLast={index === items.length - 1}
-              />
-            ))}
-          </div>
+      <div className="rounded-md border border-light-border dark:border-dark-border bg-white dark:bg-dark-bg p-6 font-mono">
+        <div className="text-sm text-accent-yellow mb-3">~/your-repo/</div>
+        <div className="space-y-0.5">
+          {items.map((item, index) => (
+            <FileTreeNode
+              key={index}
+              item={item}
+              isLast={index === items.length - 1}
+            />
+          ))}
         </div>
       </div>
     </section>

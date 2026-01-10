@@ -4,41 +4,42 @@ interface ComponentCardProps {
   icon: ReactNode;
   title: string;
   description: string;
+  isActive?: boolean;
 }
 
-function TerminalDots() {
+export function ComponentCard({ icon, title, description, isActive = false }: ComponentCardProps) {
   return (
-    <div className="flex items-center gap-1.5">
-      <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600" />
-      <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600" />
-      <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600" />
-    </div>
-  );
-}
-
-export function ComponentCard({ icon, title, description }: ComponentCardProps) {
-  return (
-    <div className="terminal-window group hover:border-accent-yellow transition-colors duration-150">
-      {/* Title bar with macOS dots */}
-      <div className="terminal-titlebar">
-        <TerminalDots />
-        <span className="font-mono text-xs text-light-text-muted dark:text-text-muted ml-2">
-          {title.toLowerCase().replace(/\s+/g, "-")}.tsx
-        </span>
+    <div 
+      className={`
+        rounded-md border p-6 transition-all duration-300 flex flex-col items-center text-center
+        ${isActive 
+          ? "border-accent-yellow bg-accent-yellow/5 scale-[1.02] shadow-lg shadow-accent-yellow/20" 
+          : "border-light-border dark:border-dark-border opacity-60 hover:opacity-80 hover:border-accent-yellow/30"
+        }
+      `}
+    >
+      {/* Icon */}
+      <div 
+        className={`
+          w-12 h-12 rounded flex items-center justify-center mb-3 transition-all duration-300
+          ${isActive 
+            ? "bg-accent-yellow/20 text-accent-yellow scale-110" 
+            : "bg-light-bg-subtle dark:bg-dark-bg-subtle text-accent-yellow"
+          }
+        `}
+      >
+        {icon}
       </div>
-
-      {/* Card content */}
-      <div className="terminal-content">
-        <div className="w-10 h-10 bg-light-bg-subtle dark:bg-dark-bg-subtle rounded flex items-center justify-center text-accent-yellow mb-4">
-          {icon}
-        </div>
-        <h3 className="font-mono text-base font-semibold text-light-text dark:text-text-primary mb-2">
-          {title}
-        </h3>
-        <p className="text-sm text-light-text-muted dark:text-text-muted leading-relaxed">
-          {description}
-        </p>
-      </div>
+      
+      {/* Title */}
+      <h3 className="font-mono text-sm font-semibold text-light-text dark:text-text-primary mb-1.5">
+        {title}
+      </h3>
+      
+      {/* Description */}
+      <p className="text-xs text-light-text-muted dark:text-text-muted leading-relaxed">
+        {description}
+      </p>
     </div>
   );
 }

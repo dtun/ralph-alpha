@@ -1,8 +1,6 @@
 import { Header } from "./_components/header";
 import { BigIdeaSection } from "./_components/big-idea-section";
-import { ComponentCard } from "./_components/component-card";
-import { ComponentGrid } from "./_components/component-grid";
-import { WorkflowSteps } from "./_components/workflow-steps";
+import { PlayerWorkflow } from "./_components/player-workflow";
 import { ComparisonSection } from "./_components/comparison-section";
 import { FileTree } from "./_components/file-tree";
 import { SetupChecklist } from "./_components/setup-checklist";
@@ -16,7 +14,7 @@ import {
   headerContent,
   bigIdeaContent,
   componentsContent,
-  workflowSteps,
+  unifiedSteps,
   comparisonContent,
   fileTreeContent,
   setupChecklistContent,
@@ -42,31 +40,18 @@ export default function Home() {
           description={bigIdeaContent.description}
         />
 
-        {/* Components Grid */}
-        <section>
-          <h2 className="font-mono text-xl md:text-2xl font-semibold text-light-text dark:text-text-primary mb-8 text-center">
-            The Players
-          </h2>
-          <ComponentGrid>
-            {componentsContent.map((component) => (
-              <ComponentCard
-                key={component.id}
-                icon={iconMap[component.id]}
-                title={component.title}
-                description={component.description}
-              />
-            ))}
-          </ComponentGrid>
-        </section>
-
-        {/* Interactive Workflow */}
-        <WorkflowSteps steps={workflowSteps} />
-
-        {/* Why Multiplayer */}
+        {/* Why Multiplayer - Context before implementation */}
         <ComparisonSection
           heading={comparisonContent.heading}
           before={comparisonContent.before}
           after={comparisonContent.after}
+        />
+
+        {/* The Players - Interactive workflow with player highlighting */}
+        <PlayerWorkflow
+          players={componentsContent}
+          steps={unifiedSteps}
+          iconMap={iconMap}
         />
 
         {/* File Structure */}
