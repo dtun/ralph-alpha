@@ -9,19 +9,25 @@ export const metadata: Metadata = {
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-  // Open Graph - Share preview
+  // Open Graph - Share preview with theme support
   openGraph: {
     title: "Ralph Alpha - Multiplayer AI Coding",
     description: "Your team's laptops. One AI-powered fleet.",
-    type: "website",
     url: "https://ralph-alpha.com",
     siteName: "Ralph Alpha",
+    type: "website",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image-light.png",
         width: 1200,
         height: 630,
-        alt: "Ralph Alpha - Multiplayer AI Coding",
+        alt: "Ralph Alpha - Multiplayer AI Coding (Light Mode)",
+      },
+      {
+        url: "/og-image-dark.png",
+        width: 1200,
+        height: 630,
+        alt: "Ralph Alpha - Multiplayer AI Coding (Dark Mode)",
       },
     ],
   },
@@ -30,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ralph Alpha - Multiplayer AI Coding",
     description: "Your team's laptops. One AI-powered fleet.",
-    images: ["/og-image.png"],
+    images: ["/og-image-light.png"],
   },
 };
 
@@ -41,7 +47,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+      </body>
     </html>
   );
 }
