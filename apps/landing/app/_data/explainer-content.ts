@@ -2,36 +2,35 @@ import { WorkflowStep } from "../_components/workflow-steps/step-detail-panel";
 
 export const headerContent = {
   title: "Multiplayer AI Coding",
-  subtitle:
-    "Team-based AI pair programming using self-hosted GitHub Action runners + Claude Code",
+  subtitle: "Your team's laptops. One AI-powered fleet.",
 };
 
 export const bigIdeaContent = {
-  heading: "The Big Idea",
+  heading: "Code together. Apart.",
   description:
-    "Instead of one person running Claude Code on their machine, the whole team's machines become a pool of AI workers. Anyone can trigger a task, any available machine picks it up, and the result is always a PR for the team to review together.",
+    "Anyone triggers a task. Any idle machine picks it up. Every change becomes a PR the whole team reviews. It's pair programming—multiplied.",
 };
 
 export const componentsContent = [
   {
     id: "runners",
     title: "Self-Hosted Runners",
-    description: "Dev machines registered with GitHub Actions",
+    description: "Your laptops, ready to work.",
   },
   {
     id: "actions",
     title: "GitHub Actions",
-    description: "Workflow orchestration and triggers",
+    description: "Orchestrates the magic.",
   },
   {
     id: "ralph",
     title: "Ralph Script",
-    description: "Bash script that runs Claude Code in a loop",
+    description: "Keeps the AI in the loop.",
   },
   {
     id: "claude",
     title: "Claude Code",
-    description: "CLI tool that does the actual coding",
+    description: "Does the actual coding.",
   },
 ];
 
@@ -84,23 +83,21 @@ done`,
 ];
 
 export const comparisonContent = {
-  heading: "Why Multiplayer?",
+  heading: "Why go multiplayer?",
   before: {
-    title: "Single Player (Before)",
+    title: "Solo Mode",
     points: [
-      "One person runs Claude Code on their machine",
-      "Others wait or work on separate tasks",
-      "Changes live on one person's branch",
-      "Limited parallelism",
+      "One machine. One AI session.",
+      "Everyone else waits.",
+      "Changes stuck on one branch.",
     ],
   },
   after: {
-    title: "Multiplayer (After)",
+    title: "Multiplayer Mode",
     points: [
-      "Anyone can trigger AI tasks",
-      "Any idle machine picks up work",
-      "PRs go to the whole team",
-      "Parallel AI sessions across the fleet",
+      "Any machine. Any time.",
+      "Parallel AI sessions.",
+      "PRs for the whole team.",
     ],
   },
 };
