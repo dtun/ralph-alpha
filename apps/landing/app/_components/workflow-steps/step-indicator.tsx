@@ -31,7 +31,7 @@ export function StepIndicator({
             ${
               isActive
                 ? "bg-brand-600 text-white scale-110 shadow-lg"
-                : "bg-gray-200 text-gray-600 group-hover:bg-brand-100 group-hover:text-brand-600"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-brand-100 dark:group-hover:bg-brand-700/30 group-hover:text-brand-600 dark:group-hover:text-brand-100"
             }
           `}
         >
@@ -40,7 +40,7 @@ export function StepIndicator({
         <span
           className={`
             text-xs font-medium transition-colors duration-200
-            ${isActive ? "text-brand-600" : "text-gray-500 group-hover:text-gray-700"}
+            ${isActive ? "text-brand-600 dark:text-brand-100" : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300"}
           `}
         >
           {label}
@@ -48,7 +48,7 @@ export function StepIndicator({
       </button>
 
       {!isLast && (
-        <div className="hidden md:block w-12 lg:w-20 h-0.5 bg-gray-200 mx-2" />
+        <div className="hidden md:block w-12 lg:w-20 h-0.5 bg-gray-200 dark:bg-gray-700 mx-2" />
       )}
     </div>
   );

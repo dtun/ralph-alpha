@@ -12,23 +12,23 @@ interface SetupChecklistProps {
 export function SetupChecklist({ heading, steps }: SetupChecklistProps) {
   return (
     <section>
-      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
         {heading}
       </h2>
 
-      <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
         {steps.map((step, index) => (
           <div key={index} className="flex gap-4 p-5">
-            <div className="flex-shrink-0 w-7 h-7 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center font-semibold text-sm">
+            <div className="flex-shrink-0 w-7 h-7 bg-brand-100 dark:bg-brand-700/30 text-brand-600 dark:text-brand-100 rounded-full flex items-center justify-center font-semibold text-sm">
               {index + 1}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900">{step.title}</h3>
+              <h3 className="font-medium text-gray-900 dark:text-white">{step.title}</h3>
               {step.description && (
-                <p className="text-gray-500 text-sm mt-1">{step.description}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{step.description}</p>
               )}
               {step.command && (
-                <code className="block mt-2 px-3 py-2 bg-gray-50 rounded-lg font-mono text-sm text-gray-700">
+                <code className="block mt-2 px-3 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg font-mono text-sm text-gray-700 dark:text-gray-300">
                   {step.command}
                 </code>
               )}

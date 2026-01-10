@@ -31,7 +31,7 @@ const iconMap: Record<string, React.ReactNode> = {
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-6 py-16 space-y-16">
         {/* Header */}
         <Header title={headerContent.title} subtitle={headerContent.subtitle} />
@@ -44,7 +44,7 @@ export default function Home() {
 
         {/* Components Grid */}
         <section>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
             The Players
           </h2>
           <ComponentGrid>

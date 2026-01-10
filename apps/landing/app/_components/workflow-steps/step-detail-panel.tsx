@@ -29,16 +29,16 @@ export function StepDetailPanel({
   hasNext,
 }: StepDetailPanelProps) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8 mt-8">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 md:p-8 mt-8">
       <div className="flex items-center gap-3 mb-4">
-        <span className="bg-brand-100 text-brand-600 text-sm font-semibold px-3 py-1 rounded-full">
+        <span className="bg-brand-100 dark:bg-brand-700/30 text-brand-600 dark:text-brand-100 text-sm font-semibold px-3 py-1 rounded-full">
           Step {stepNumber}
         </span>
-        <h3 className="text-xl font-bold text-gray-900">{step.label}</h3>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{step.label}</h3>
       </div>
 
-      <p className="text-lg text-gray-700 mb-4">{step.description}</p>
-      <p className="text-gray-600 mb-6">{step.details}</p>
+      <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">{step.description}</p>
+      <p className="text-gray-600 dark:text-gray-400 mb-6">{step.details}</p>
 
       {step.code && (
         <div className="mb-6">
