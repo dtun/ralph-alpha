@@ -1,26 +1,82 @@
-import { Button } from "@ralph/ui";
+import { Header } from "./_components/header";
+import { BigIdeaSection } from "./_components/big-idea-section";
+import { ComponentCard } from "./_components/component-card";
+import { ComponentGrid } from "./_components/component-grid";
+import { WorkflowSteps } from "./_components/workflow-steps";
+import { ComparisonSection } from "./_components/comparison-section";
+import { FileTree } from "./_components/file-tree";
+import { SetupChecklist } from "./_components/setup-checklist";
+import {
+  LaptopIcon,
+  WorkflowIcon,
+  TerminalIcon,
+  SparklesIcon,
+} from "./_components/icons";
+import {
+  headerContent,
+  bigIdeaContent,
+  componentsContent,
+  workflowSteps,
+  comparisonContent,
+  fileTreeContent,
+  setupChecklistContent,
+} from "./_data/explainer-content";
+
+const iconMap: Record<string, React.ReactNode> = {
+  runners: <LaptopIcon />,
+  actions: <WorkflowIcon />,
+  ralph: <TerminalIcon />,
+  claude: <SparklesIcon />,
+};
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <div className="max-w-2xl space-y-8 text-center">
-        <h1 className="text-5xl font-bold tracking-tight text-gray-900">
-          Hello <span className="text-brand-600">Ralph Alpha</span>
-        </h1>
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-6 py-16 space-y-16">
+        {/* Header */}
+        <Header title={headerContent.title} subtitle={headerContent.subtitle} />
 
-        <p className="text-xl text-gray-600">
-          A modern monorepo built with Bun, Turborepo, Next.js 15, and Tailwind
-          CSS v4.
-        </p>
+        {/* The Big Idea */}
+        <BigIdeaSection
+          heading={bigIdeaContent.heading}
+          description={bigIdeaContent.description}
+        />
 
-        <div className="flex justify-center gap-4">
-          <Button variant="primary" size="lg">
-            Get Started
-          </Button>
-          <Button variant="outline" size="lg">
-            Learn More
-          </Button>
-        </div>
+        {/* Components Grid */}
+        <section>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
+            The Players
+          </h2>
+          <ComponentGrid>
+            {componentsContent.map((component) => (
+              <ComponentCard
+                key={component.id}
+                icon={iconMap[component.id]}
+                title={component.title}
+                description={component.description}
+              />
+            ))}
+          </ComponentGrid>
+        </section>
+
+        {/* Interactive Workflow */}
+        <WorkflowSteps steps={workflowSteps} />
+
+        {/* Why Multiplayer */}
+        <ComparisonSection
+          heading={comparisonContent.heading}
+          before={comparisonContent.before}
+          after={comparisonContent.after}
+        />
+
+        {/* File Structure */}
+        <FileTree heading={fileTreeContent.heading} items={fileTreeContent.items} />
+
+        {/* Setup Checklist */}
+        <SetupChecklist
+          heading={setupChecklistContent.heading}
+          steps={setupChecklistContent.steps}
+        />
       </div>
     </main>
   );
