@@ -33,7 +33,11 @@ export default function Home() {
     <main className="min-h-screen bg-light-bg dark:bg-dark-bg">
       <div className="max-w-4xl mx-auto px-6 py-16 space-y-16">
         {/* Header */}
-        <Header title={headerContent.title} subtitle={headerContent.subtitle} />
+        <Header 
+          brand={headerContent.brand} 
+          title={headerContent.title} 
+          subtitle={headerContent.subtitle} 
+        />
 
         {/* The Big Idea */}
         <BigIdeaSection

@@ -1,4 +1,5 @@
 export const headerContent = {
+  brand: "Ralph Alpha",
   title: "Multiplayer AI Coding",
   subtitle: "Your team's laptops. One AI-powered fleet.",
 };
@@ -6,7 +7,7 @@ export const headerContent = {
 export const bigIdeaContent = {
   heading: "Code together. Apart.",
   description:
-    "Anyone triggers a task. Any idle machine picks it up. Every change becomes a PR the whole team reviews. It's pair programming—multiplied.",
+    "Ralph Alpha lets anyone trigger a task. Any idle machine picks it up. Every change becomes a PR the whole team reviews. It's pair programming—multiplied.",
 };
 
 export const componentsContent = [
