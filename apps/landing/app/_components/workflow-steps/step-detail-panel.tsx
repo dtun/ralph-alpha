@@ -23,9 +23,9 @@ interface StepDetailPanelProps {
 function TerminalDots() {
   return (
     <div className="flex items-center gap-1.5">
-      <div className="w-3 h-3 rounded-full bg-terminal-red" />
-      <div className="w-3 h-3 rounded-full bg-terminal-yellow" />
-      <div className="w-3 h-3 rounded-full bg-terminal-green" />
+      <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600" />
+      <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600" />
+      <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600" />
     </div>
   );
 }
@@ -62,7 +62,7 @@ export function StepDetailPanel({
 
         {step.code && (
           <div className="mb-6">
-            <CodeBlock code={step.code} language={step.codeLanguage} />
+            <CodeBlock code={step.code} language={step.codeLanguage} bare />
           </div>
         )}
 
