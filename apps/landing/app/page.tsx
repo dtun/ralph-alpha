@@ -4,6 +4,7 @@ import { PlayerWorkflow } from "./_components/player-workflow";
 import { ComparisonSection } from "./_components/comparison-section";
 import { FileTree } from "./_components/file-tree";
 import { SetupChecklist } from "./_components/setup-checklist";
+import { Footer } from "./_components/footer";
 import {
   LaptopIcon,
   WorkflowIcon,
@@ -63,6 +64,9 @@ export default function Home() {
           steps={setupChecklistContent.steps}
         />
       </div>
+
+      {/* Footer */}
+      <Footer />
     </main>
   );
 }
