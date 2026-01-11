@@ -32,7 +32,7 @@ const iconMap: Record<string, React.ReactNode> = {
 export default function Home() {
   return (
     <main className="min-h-screen bg-light-bg dark:bg-dark-bg">
-      <div className="max-w-4xl mx-auto px-6 py-16 space-y-16">
+      <div className="max-w-4xl mx-auto px-6 py-24 space-y-24">
         {/* Header */}
         <Header
           brand={headerContent.brand}

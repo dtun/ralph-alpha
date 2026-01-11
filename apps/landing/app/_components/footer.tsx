@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="border-t border-light-border dark:border-dark-border mt-16 py-8">
+    <footer className="border-t border-light-border dark:border-dark-border mt-24 py-8">
       <div className="text-center text-sm text-light-text-muted dark:text-text-muted">
         <p>
           Incubated by{" "}
