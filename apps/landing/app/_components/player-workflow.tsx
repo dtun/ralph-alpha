@@ -146,9 +146,6 @@ export function PlayerWorkflow({
       <div className="terminal-window">
         <div className="terminal-titlebar">
           <TerminalDots />
-          <span className="font-mono text-xs text-light-text-muted dark:text-text-muted ml-2">
-            step-{activeStep + 1}.md
-          </span>
 
           {/* Pause/Play button */}
           <button

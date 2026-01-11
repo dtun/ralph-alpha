@@ -57,8 +57,12 @@ export function StepDetailPanel({
           </h3>
         </div>
 
-        <p className="text-base text-light-text dark:text-text-primary mb-3">{step.description}</p>
-        <p className="text-sm text-light-text-muted dark:text-text-muted mb-6">{step.details}</p>
+        <p className="text-base text-light-text dark:text-text-primary mb-3">
+          {step.description}
+        </p>
+        <p className="text-sm text-light-text-muted dark:text-text-muted mb-6">
+          {step.details}
+        </p>
 
         {step.code && (
           <div className="mb-6">
@@ -72,9 +76,10 @@ export function StepDetailPanel({
             disabled={!hasPrevious}
             className={`
               font-mono text-sm px-4 py-2 rounded border transition-colors duration-150
-              ${hasPrevious
-                ? "border-light-border dark:border-dark-border text-light-text dark:text-text-primary hover:border-accent-yellow hover:text-accent-yellow"
-                : "opacity-40 cursor-not-allowed border-light-border dark:border-dark-border text-light-text-muted dark:text-text-muted"
+              ${
+                hasPrevious
+                  ? "border-light-border dark:border-dark-border text-light-text dark:text-text-primary hover:border-accent-yellow hover:text-accent-yellow"
+                  : "opacity-40 cursor-not-allowed border-light-border dark:border-dark-border text-light-text-muted dark:text-text-muted"
               }
             `}
           >
@@ -85,9 +90,10 @@ export function StepDetailPanel({
             disabled={!hasNext}
             className={`
               font-mono text-sm px-4 py-2 rounded border transition-colors duration-150
-              ${hasNext
-                ? "border-accent-yellow bg-accent-yellow/10 text-accent-yellow hover:bg-accent-yellow/20"
-                : "opacity-40 cursor-not-allowed border-light-border dark:border-dark-border text-light-text-muted dark:text-text-muted"
+              ${
+                hasNext
+                  ? "border-accent-yellow bg-accent-yellow/10 text-accent-yellow hover:bg-accent-yellow/20"
+                  : "opacity-40 cursor-not-allowed border-light-border dark:border-dark-border text-light-text-muted dark:text-text-muted"
               }
             `}
           >
