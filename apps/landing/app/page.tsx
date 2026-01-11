@@ -5,6 +5,7 @@ import { ComparisonSection } from "./_components/comparison-section";
 import { FileTree } from "./_components/file-tree";
 import { SetupChecklist } from "./_components/setup-checklist";
 import { Footer } from "./_components/footer";
+import { ComingSoonSection } from "./_components/coming-soon-section";
 import {
   LaptopIcon,
   WorkflowIcon,
@@ -67,6 +68,9 @@ export default function Home() {
           heading={setupChecklistContent.heading}
           steps={setupChecklistContent.steps}
         /> */}
+
+        {/* Coming Soon */}
+        <ComingSoonSection />
       </div>
 
       {/* Footer */}
