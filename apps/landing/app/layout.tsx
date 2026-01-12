@@ -18,16 +18,10 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og-image-light.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Ralph Alpha - Multiplayer AI Coding (Light Mode)",
-      },
-      {
-        url: "/og-image-dark.png",
-        width: 1200,
-        height: 630,
-        alt: "Ralph Alpha - Multiplayer AI Coding (Dark Mode)",
+        alt: "Ralph Alpha - Multiplayer AI Coding",
       },
     ],
   },
@@ -36,7 +30,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ralph Alpha - Multiplayer AI Coding",
     description: "Your team's laptops. One AI-powered fleet.",
-    images: ["/og-image-light.png"],
+    images: ["/og-image.png"],
   },
 };
 
