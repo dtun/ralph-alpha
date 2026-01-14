@@ -3,13 +3,7 @@
 import { useState, useEffect, ReactNode } from "react";
 import { ComponentCard } from "./component-card";
 import { CodeBlock } from "./code-block";
-import { UnifiedStep } from "../_data/explainer-content";
-
-interface PlayerData {
-  id: string;
-  title: string;
-  description: string;
-}
+import { UnifiedStep, PlayerData } from "../_data/explainer-content";
 
 interface PlayerWorkflowProps {
   players: PlayerData[];
@@ -82,12 +76,40 @@ export function PlayerWorkflow({
 }: PlayerWorkflowProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [randomSubPlayerId, setRandomSubPlayerId] = useState<string | null>(null);
 
   const step = steps[activeStep];
-  const activePlayerIds = step.playerIds;
+  const basePlayerIds = step.playerIds;
+
+  // Collect all sub-player IDs from players
+  const allSubPlayers = players.flatMap((p) => p.subPlayers || []);
+  const allSubPlayerIds = allSubPlayers.map((sp) => sp.id);
+
+  // Find which sub-players are referenced in the current step
+  const activeSubPlayerIds = basePlayerIds.filter((id) =>
+    allSubPlayerIds.includes(id)
+  );
+
+  // Build the effective activePlayerIds (non-sub-players + randomly selected sub-player)
+  const activePlayerIds = [
+    ...basePlayerIds.filter((id) => !allSubPlayerIds.includes(id)),
+    ...(randomSubPlayerId && activeSubPlayerIds.includes(randomSubPlayerId)
+      ? [randomSubPlayerId]
+      : []),
+  ];
 
   const hasPrevious = activeStep > 0;
   const hasNext = activeStep < steps.length - 1;
+
+  // Pick a random sub-player when step changes
+  useEffect(() => {
+    if (activeSubPlayerIds.length > 0) {
+      const randomIndex = Math.floor(Math.random() * activeSubPlayerIds.length);
+      setRandomSubPlayerId(activeSubPlayerIds[randomIndex]);
+    } else {
+      setRandomSubPlayerId(null);
+    }
+  }, [activeStep]);
 
   // Auto-advance through steps (with a11y consideration)
   useEffect(() => {
@@ -118,15 +140,30 @@ export function PlayerWorkflow({
 
       {/* Player cards - 4 across, highlight based on active step */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-        {players.map((player) => (
-          <ComponentCard
-            key={player.id}
-            icon={iconMap[player.id]}
-            title={player.title}
-            description={player.description}
-            isActive={activePlayerIds.includes(player.id)}
-          />
-        ))}
+        {players.map((player) => {
+          // Check if the player itself or any of its sub-players are active
+          const subPlayerIds = player.subPlayers?.map((sp) => sp.id) || [];
+          const isActive =
+            activePlayerIds.includes(player.id) ||
+            subPlayerIds.some((id) => activePlayerIds.includes(id));
+
+          // Build sub-players with their active states
+          const subPlayersWithState = player.subPlayers?.map((sp) => ({
+            ...sp,
+            isActive: activePlayerIds.includes(sp.id),
+          }));
+
+          return (
+            <ComponentCard
+              key={player.id}
+              icon={iconMap[player.id]}
+              title={player.title}
+              description={player.description}
+              isActive={isActive}
+              subPlayers={subPlayersWithState}
+            />
+          );
+        })}
       </div>
 
       {/* Step indicators */}

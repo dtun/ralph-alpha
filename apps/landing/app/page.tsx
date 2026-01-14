@@ -26,7 +26,7 @@ const iconMap: Record<string, React.ReactNode> = {
   runners: <LaptopIcon />,
   actions: <WorkflowIcon />,
   ralph: <TerminalIcon />,
-  claude: <SparklesIcon />,
+  agents: <SparklesIcon />,
 };
 
 export default function Home() {

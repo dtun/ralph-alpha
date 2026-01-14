@@ -10,7 +10,19 @@ export const bigIdeaContent = {
     "Ralph Alpha lets anyone trigger a task. Any idle machine picks it up. Every change becomes a PR the whole team reviews. It's pair programming—multiplied.",
 };
 
-export const componentsContent = [
+export interface SubPlayer {
+  id: string;
+  label: string;
+}
+
+export interface PlayerData {
+  id: string;
+  title: string;
+  description: string;
+  subPlayers?: SubPlayer[];
+}
+
+export const componentsContent: PlayerData[] = [
   {
     id: "runners",
     title: "Self-Hosted Runners",
@@ -27,9 +39,13 @@ export const componentsContent = [
     description: "Keeps the AI in the loop.",
   },
   {
-    id: "claude",
-    title: "Claude Code",
+    id: "agents",
+    title: "Coding Agents",
     description: "Does the actual coding.",
+    subPlayers: [
+      { id: "claude", label: "Claude Code" },
+      { id: "opencode", label: "OpenCode" },
+    ],
   },
 ];
 
@@ -66,15 +82,15 @@ export const unifiedSteps: UnifiedStep[] = [
   },
   {
     label: "AI Codes",
-    description: "Claude iterates through the task",
+    description: "Your coding agent iterates through the task",
     details:
-      "The ralph.sh script runs Claude Code in a loop: plan → code → test → reflect. Repeats until done or stuck.",
+      "The ralph.sh script runs your coding agent in a loop: plan → code → test → reflect. Repeats until done or stuck.",
     code: `for i in $(seq 1 $MAX_ITERATIONS); do
-  claude code --prompt-file prompt.txt
+  $CODING_AGENT --prompt-file prompt.txt
   npm test
 done`,
     codeLanguage: "bash",
-    playerIds: ["ralph", "claude"],
+    playerIds: ["ralph", "claude", "opencode"],
   },
   {
     label: "PR & Review",
