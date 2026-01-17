@@ -2,16 +2,8 @@ import { XIcon } from "./icons";
 
 export function ComingSoonSection() {
   return (
-    <section className="relative rounded-md border border-light-border dark:border-dark-border bg-light-bg-subtle dark:bg-dark-bg-subtle p-8 md:p-12">
-      {/* Decorative corner brackets */}
-      <div className="absolute top-2 left-2 font-mono text-accent-yellow text-lg opacity-50 select-none">
-        {"["}
-      </div>
-      <div className="absolute bottom-2 right-2 font-mono text-accent-yellow text-lg opacity-50 select-none">
-        {"]"}
-      </div>
-
-      <h2 className="font-mono text-xl md:text-2xl font-bold text-accent-yellow mb-4">
+    <section className="relative rounded-md border border-light-border dark:border-dark-border p-6 md:p-8">
+      <h2 className="font-mono text-base md:text-lg text-light-text-muted dark:text-text-muted mb-3">
         Coming Soon
       </h2>
       <div className="flex items-center gap-4 text-light-text-muted dark:text-text-muted">
