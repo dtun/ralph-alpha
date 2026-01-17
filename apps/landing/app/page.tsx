@@ -6,6 +6,7 @@ import { FileTree } from "./_components/file-tree";
 import { SetupChecklist } from "./_components/setup-checklist";
 import { Footer } from "./_components/footer";
 import { ComingSoonSection } from "./_components/coming-soon-section";
+import { EarlyInvestorSection } from "./_components/early-investor-section";
 import {
   LaptopIcon,
   WorkflowIcon,
@@ -71,6 +72,9 @@ export default function Home() {
 
         {/* Coming Soon */}
         <ComingSoonSection />
+
+        {/* Early Investor */}
+        <EarlyInvestorSection />
       </div>
 
       {/* Footer */}
