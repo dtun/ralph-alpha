@@ -7,6 +7,7 @@ import { SetupChecklist } from "./_components/setup-checklist";
 import { Footer } from "./_components/footer";
 import { ComingSoonSection } from "./_components/coming-soon-section";
 import { EarlyInvestorSection } from "./_components/early-investor-section";
+import { HowItWorksSection } from "./_components/how-it-works-section";
 import {
   LaptopIcon,
   WorkflowIcon,
@@ -69,6 +70,9 @@ export default function Home() {
           heading={setupChecklistContent.heading}
           steps={setupChecklistContent.steps}
         /> */}
+
+        {/* How It Works - Deep dive on the Action */}
+        <HowItWorksSection />
 
         {/* Coming Soon */}
         <ComingSoonSection />
