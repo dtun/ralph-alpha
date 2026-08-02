@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, ReactNode } from "react";
+import Link from "next/link";
 import { ComponentCard } from "./component-card";
 import { CodeBlock } from "./code-block";
 import { UnifiedStep, PlayerData } from "../_data/explainer-content";
@@ -76,7 +77,9 @@ export function PlayerWorkflow({
 }: PlayerWorkflowProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [randomSubPlayerId, setRandomSubPlayerId] = useState<string | null>(null);
+  const [randomSubPlayerId, setRandomSubPlayerId] = useState<string | null>(
+    null,
+  );
 
   const step = steps[activeStep];
   const basePlayerIds = step.playerIds;
@@ -87,7 +90,7 @@ export function PlayerWorkflow({
 
   // Find which sub-players are referenced in the current step
   const activeSubPlayerIds = basePlayerIds.filter((id) =>
-    allSubPlayerIds.includes(id)
+    allSubPlayerIds.includes(id),
   );
 
   // Build the effective activePlayerIds (non-sub-players + randomly selected sub-player)
@@ -115,7 +118,7 @@ export function PlayerWorkflow({
   useEffect(() => {
     // Respect prefers-reduced-motion
     const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+      "(prefers-reduced-motion: reduce)",
     ).matches;
     if (prefersReducedMotion || !isPlaying) return;
 
@@ -251,6 +254,16 @@ export function PlayerWorkflow({
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Depth link - the walkthrough for anyone who wants the mechanism */}
+      <div className="mt-4 text-center">
+        <Link
+          href="/action"
+          className="font-mono text-sm text-light-text-muted dark:text-text-muted hover:text-accent-yellow hover:underline transition-colors"
+        >
+          How it actually works {"-->"}
+        </Link>
       </div>
     </section>
   );
