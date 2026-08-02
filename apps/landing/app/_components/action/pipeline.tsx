@@ -17,14 +17,18 @@ export function Pipeline({ stages }: PipelineProps) {
 
       <ol className="mt-6 space-y-0">
         {stages.map((stage, i) => (
-          <li key={stage.label} className="flex gap-4 md:gap-6">
+          <li
+            key={stage.id}
+            id={stage.id}
+            className="pipeline-stage flex gap-4 md:gap-6 -mx-3 px-3 rounded-md scroll-mt-24 transition-colors duration-300"
+          >
             {/* Rail: marker plus the connector to the next stage */}
             <div
               className="flex flex-col items-center shrink-0"
               aria-hidden="true"
             >
               <span
-                className={`font-mono text-xs w-7 h-7 rounded-full border flex items-center justify-center tabular-nums ${
+                className={`pipeline-marker font-mono text-xs w-7 h-7 rounded-full border flex items-center justify-center tabular-nums transition-colors duration-300 ${
                   stage.seam
                     ? "border-accent-yellow text-accent-yellow"
                     : "border-light-border dark:border-dark-border text-light-text-muted dark:text-text-subtle"

@@ -59,6 +59,7 @@ export interface UnifiedStep {
   code?: string;
   codeLanguage?: string;
   playerIds: string[]; // Which players are active for this step
+  anchor?: string; // Matching stage on /action, for the deep link
 }
 
 export const unifiedSteps: UnifiedStep[] = [
@@ -71,6 +72,7 @@ export const unifiedSteps: UnifiedStep[] = [
   --add-label ready-for-agent`,
     codeLanguage: "bash",
     playerIds: ["actions"],
+    anchor: "trigger",
   },
   {
     label: "Runner Claims",
@@ -81,6 +83,7 @@ export const unifiedSteps: UnifiedStep[] = [
 # Any registered runner can claim this`,
     codeLanguage: "yaml",
     playerIds: ["runners"],
+    anchor: "claim",
   },
   {
     label: "AI Codes",
@@ -91,6 +94,7 @@ export const unifiedSteps: UnifiedStep[] = [
 agent: claude        # or codex, opencode, pi`,
     codeLanguage: "yaml",
     playerIds: ["skills", "claude", "codex", "opencode", "pi"],
+    anchor: "pack",
   },
   {
     label: "PR & Review",
@@ -102,6 +106,7 @@ agent: claude        # or codex, opencode, pi`,
   --base main`,
     codeLanguage: "bash",
     playerIds: ["actions"],
+    anchor: "review",
   },
 ];
 

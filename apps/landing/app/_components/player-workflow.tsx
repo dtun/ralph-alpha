@@ -221,6 +221,21 @@ export function PlayerWorkflow({
             </div>
           )}
 
+          {step.anchor && (
+            <div className="mb-4 text-right">
+              <Link
+                href={`/action#${step.anchor}`}
+                // Stop the carousel on intent to click, so the link cannot
+                // advance to a different step under the cursor.
+                onMouseEnter={() => setIsPlaying(false)}
+                onFocus={() => setIsPlaying(false)}
+                className="font-mono text-xs text-light-text-muted dark:text-text-muted hover:text-accent-yellow hover:underline transition-colors duration-150"
+              >
+                How this step works {"-->"}
+              </Link>
+            </div>
+          )}
+
           <div className="flex justify-between pt-4 border-t border-light-border dark:border-dark-border">
             <button
               onClick={() => setActiveStep((prev) => Math.max(0, prev - 1))}
@@ -254,16 +269,6 @@ export function PlayerWorkflow({
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Depth link - the walkthrough for anyone who wants the mechanism */}
-      <div className="mt-4 text-center">
-        <Link
-          href="/action"
-          className="font-mono text-sm text-light-text-muted dark:text-text-muted hover:text-accent-yellow hover:underline transition-colors"
-        >
-          How it actually works {"-->"}
-        </Link>
       </div>
     </section>
   );

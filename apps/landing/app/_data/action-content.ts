@@ -8,6 +8,7 @@ export const actionHeaderContent = {
 };
 
 export interface PipelineStage {
+  id: string;
   label: string;
   detail: string;
   seam?: string;
@@ -15,28 +16,33 @@ export interface PipelineStage {
 
 export const pipelineStages: PipelineStage[] = [
   {
+    id: "trigger",
     label: "Issue labeled ready-for-agent",
     detail:
       "Ralph defines no label of its own. It reuses the one your triage flow already produces, which also posts an Agent Brief — the structured comment Ralph treats as the contract.",
   },
   {
+    id: "claim",
     label: "A runner claims it",
     detail:
       "Any machine registered to the repo. One agent per issue, enforced by a concurrency group keyed on the issue number.",
   },
   {
+    id: "pack",
     label: "Install the pinned skill pack",
     detail:
       "Cloned at a fixed ref and copied into the workspace, then excluded via .git/info/exclude so it never lands in the agent's diff.",
     seam: "skills-repo · skills-ref",
   },
   {
+    id: "agent",
     label: "Agent runs the entry skill",
     detail:
       "The AFK preamble is prepended, then the brief. The pack owns iteration, testing and the definition of done — Ralph only holds the wall clock.",
     seam: "agent · agent-args",
   },
   {
+    id: "review",
     label: "Draft PR, back on the thread",
     detail:
       "ASSUMPTIONS.md lands in the PR body. Blocked runs, blown budgets and failed verification all ship as drafts that say why.",
