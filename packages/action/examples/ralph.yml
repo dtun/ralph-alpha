@@ -1,0 +1,39 @@
+# Copy to .github/workflows/ralph.yml in your repo.
+name: Ralph
+
+on:
+  issues:
+    types: [labeled]
+
+# One agent per issue. Re-labelling while a run is in flight replaces it.
+concurrency:
+  group: ralph-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  implement:
+    # The label your triage flow applies when an issue is fully specified
+    # and safe to hand to an unattended agent.
+    if: github.event.label.name == 'ready-for-agent'
+    runs-on: self-hosted
+    timeout-minutes: 60
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - uses: dtun/ralph-alpha/packages/action@v1
+        with:
+          verify: npm test
+          timeout-minutes: 45
+
+          # Pin the pack. An unpinned pack changes your agents' behaviour
+          # with no diff in your repo.
+          skills-repo: mattpocock/skills
+          skills-ref: v1.1.0
+
+          # The default GITHUB_TOKEN does not trigger pull_request workflows,
+          # so CI will not run on Ralph's PRs. Pass a PAT to get CI.
+          # github-token: ${{ secrets.RALPH_PAT }}

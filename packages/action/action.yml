@@ -1,0 +1,124 @@
+name: "Ralph"
+description: "Pick up a triaged issue on your own runners and drive a skill pack to a pull request. BYO agent, BYO skills."
+author: "Ralph Alpha"
+
+branding:
+  icon: "zap"
+  color: "yellow"
+
+inputs:
+  issue-number:
+    description: "Issue to work. Defaults to the issue from the triggering event."
+    required: false
+    default: ${{ github.event.issue.number }}
+
+  agent:
+    description: "Coding agent adapter to run: claude | codex | opencode | pi. Must be installed and authenticated on the runner."
+    required: false
+    default: "claude"
+
+  agent-args:
+    description: >-
+      Extra flags passed straight to the agent CLI, e.g. "--model
+      anthropic/claude-opus-4-5" for pi. Split on whitespace, so no quoted
+      arguments containing spaces.
+    required: false
+    default: ""
+
+  skills-repo:
+    description: "Skill pack to install, as owner/repo. Swap this to run your own pack."
+    required: false
+    default: "mattpocock/skills"
+
+  skills-ref:
+    description: "Ref of the skill pack to pin. Always pin — an unpinned pack changes your agent's behaviour without a diff."
+    required: false
+    default: "v1.1.0"
+
+  skills:
+    description: "Space-separated skill names to install from the pack. Empty installs every non-deprecated skill."
+    required: false
+    default: ""
+
+  command:
+    description: "Skill invocation that does the work. The agent brief is appended as context."
+    required: false
+    default: "/implement"
+
+  base:
+    description: "Branch to cut from and target with the PR."
+    required: false
+    default: ${{ github.event.repository.default_branch }}
+
+  verify:
+    description: "Optional command run after the agent finishes. Non-zero forces the PR to draft. The skill pack should already be testing; this is the outer guard."
+    required: false
+    default: ""
+
+  timeout-minutes:
+    description: "Wall-clock budget for the agent. The skill pack owns its own iteration count; Ralph only owns the clock."
+    required: false
+    default: "45"
+
+  draft:
+    description: "Open the PR as a draft."
+    required: false
+    default: "true"
+
+  github-token:
+    description: >-
+      Token for issue and PR operations. Note: PRs opened with the default
+      GITHUB_TOKEN do not trigger pull_request workflows, so your CI will not
+      run on Ralph's PRs. Pass a PAT or GitHub App token to get CI.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  status:
+    description: "success | blocked | no-changes | failed"
+    value: ${{ steps.ralph.outputs.status }}
+  pr-url:
+    description: "URL of the pull request, if one was opened."
+    value: ${{ steps.ralph.outputs.pr_url }}
+  branch:
+    description: "Branch the agent committed to."
+    value: ${{ steps.ralph.outputs.branch }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check out base
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.base }}
+        fetch-depth: 0
+        token: ${{ inputs.github-token }}
+
+    - name: Install skill pack
+      shell: bash
+      env:
+        SKILLS_REPO: ${{ inputs.skills-repo }}
+        SKILLS_REF: ${{ inputs.skills-ref }}
+        SKILLS: ${{ inputs.skills }}
+        AGENT: ${{ inputs.agent }}
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: ${{ github.action_path }}/scripts/install-skills.sh
+
+    - name: Run Ralph
+      id: ralph
+      shell: bash
+      env:
+        ISSUE_NUMBER: ${{ inputs.issue-number }}
+        AGENT: ${{ inputs.agent }}
+        AGENT_ARGS: ${{ inputs.agent-args }}
+        COMMAND: ${{ inputs.command }}
+        BASE_REF: ${{ inputs.base }}
+        VERIFY_CMD: ${{ inputs.verify }}
+        TIMEOUT_MINUTES: ${{ inputs.timeout-minutes }}
+        DRAFT: ${{ inputs.draft }}
+        RUN_NUMBER: ${{ github.run_number }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        RUNNER_LABEL: ${{ runner.name }}
+        ACTION_PATH: ${{ github.action_path }}
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: ${{ github.action_path }}/scripts/ralph.sh
