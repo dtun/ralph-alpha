@@ -102,6 +102,33 @@ Skills invoke each other, so an allowlist has to include the whole chain —
 all 28 non-deprecated skills and avoids the problem; narrow it only once you
 know what your entry skill actually reaches for.
 
+## Your own skills, on top
+
+You do not have to choose between the pack and skills of your own. Three
+sources reach the agent, and only the middle one is pinned:
+
+1. **Your repo** — anything committed under `.claude/skills/` or
+   `.agents/skills/`. **These win.** On a name collision the pack is skipped
+   and yours is left alone, because a committed skill is a deliberate override.
+2. **The pack** — cloned at `skills-ref` and copied in _around_ what your repo
+   already defines. It fills gaps rather than replacing the set.
+3. **The runner** — agents also read skills under `$HOME`, so whatever the
+   person who set that machine up has installed is in scope. Ralph cannot pin
+   this layer. It is the first place to look when two runners disagree.
+
+Every run logs the split:
+
+```
+==> pack: 26 installed from mattpocock/skills@v1.1.0 (pinned)
+==> repo: 1 kept over the pack (tdd), 1 repo-only
+==> home: skills under $HOME on this runner are visible too ...
+```
+
+Local-wins is not only ergonomics. `.git/info/exclude` cannot suppress a
+_tracked_ file, so overwriting a skill you had committed would show as a
+modification and get swept into the agent's commit — silently shipping the
+pack's version of your skill inside an unrelated pull request.
+
 ## Agents
 
 Adapters live in [`scripts/agents/`](./scripts/agents). Each is one file

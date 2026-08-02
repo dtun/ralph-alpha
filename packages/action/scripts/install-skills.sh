@@ -40,7 +40,12 @@ fi
 
 mkdir -p "$DEST"
 
+# Skills the repo ships itself, counted before anything is copied in.
+local_count="$(find "$DEST" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d '[:space:]')"
+
 installed=0
+overridden=0
+overridden_names=""
 while IFS= read -r -d '' skill_md; do
   src="$(dirname "$skill_md")"
   name="$(basename "$src")"
@@ -50,7 +55,16 @@ while IFS= read -r -d '' skill_md; do
     continue
   fi
 
-  rm -rf "${DEST:?}/$name"
+  # Local wins. A skill committed to the repo is a deliberate override, and
+  # the more specific source should beat the more general one. Overwriting it
+  # would also modify a tracked file, which .git/info/exclude cannot suppress
+  # — the pack would end up committed into the agent's pull request.
+  if [ -e "$DEST/$name" ]; then
+    overridden=$((overridden + 1))
+    overridden_names="$overridden_names $name"
+    continue
+  fi
+
   cp -R "$src" "$DEST/$name"
   installed=$((installed + 1))
 done < <(find "$TMP/pack/skills" -name SKILL.md \
@@ -58,7 +72,7 @@ done < <(find "$TMP/pack/skills" -name SKILL.md \
            -not -path '*/deprecated/*' \
            -not -path '*/in-progress/*' -print0)
 
-if [ "$installed" -eq 0 ]; then
+if [ "$installed" -eq 0 ] && [ "$local_count" -eq 0 ]; then
   echo "error: no skills installed. Check the 'skills' input against the pack's contents." >&2
   exit 1
 fi
@@ -70,5 +84,16 @@ for path in ".claude/skills/" ".agents/skills/"; do
   grep -qxF "$path" .git/info/exclude 2>/dev/null || echo "$path" >> .git/info/exclude
 done
 
-echo "==> Installed $installed skills"
+# Three layers reach the agent and only one of them is pinned, so say out loud
+# which is which. Two runners behaving differently is otherwise very hard to
+# debug from a log that just says "installed 26 skills".
+echo "==> pack: $installed installed from $SKILLS_REPO@$SKILLS_REF (pinned)"
+if [ "$local_count" -gt 0 ]; then
+  echo "==> repo: $overridden kept over the pack (${overridden_names# }), $((local_count - overridden)) repo-only"
+else
+  echo "==> repo: none"
+fi
+echo "==> home: skills under \$HOME on this runner are visible too, and Ralph"
+echo "          does not pin them — check here first if two runners disagree."
+
 echo "SKILLS_RESOLVED_SHA=$RESOLVED" >> "$GITHUB_ENV"

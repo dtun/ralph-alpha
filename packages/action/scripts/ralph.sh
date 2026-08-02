@@ -167,6 +167,17 @@ elif [ "$AGENT_STATUS" -ne 0 ]; then
   say "Agent exited $AGENT_STATUS."
 fi
 
+# Belt and braces: the pack must never enter the diff. install-skills.sh
+# refuses to overwrite a skill the repo already ships, so this should find
+# nothing — but .git/info/exclude cannot suppress a *tracked* file, so a
+# regression there would silently commit the pack over someone's own skill.
+for skills_dir in .claude/skills .agents/skills; do
+  if [ -n "$(git status --porcelain -- "$skills_dir" 2>/dev/null)" ]; then
+    say "warning: tracked files under $skills_dir changed; restoring before commit."
+    git checkout -- "$skills_dir" 2>/dev/null || true
+  fi
+done
+
 # Sweep up anything left in the tree, so partial work is never lost. For an
 # agent that commits as it goes this is a safety net and the message says so;
 # for one that never commits, this is the only commit, so it carries the work.

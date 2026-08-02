@@ -145,6 +145,30 @@ skills-ref:  v1.1.0
 agent:       claude`,
   skillsNote:
     "The pack is the bigger lever of the two. It decides how work gets planned, where tests go, and when something is done — so pointing skills-repo at your own pack changes how every agent behaves without changing a line of the orchestrator.",
+
+  layeringHeading: "Your own skills, on top",
+  layeringBody:
+    "You do not have to choose between the pack and skills of your own. Three sources reach the agent, and only the middle one is pinned.",
+  layers: [
+    {
+      source: "Your repo",
+      badge: "wins",
+      detail:
+        "Anything committed under .claude/skills or .agents/skills. On a name collision the repo wins and the pack is skipped — a skill you committed is a deliberate override, so it is left alone.",
+    },
+    {
+      source: "The pack",
+      badge: "pinned",
+      detail:
+        "Cloned at the ref you named and copied in around whatever your repo already defines. It fills the gaps rather than replacing the set.",
+    },
+    {
+      source: "The runner",
+      badge: "not pinned",
+      detail:
+        "Agents also read skills under $HOME on the machine, so whatever the person who set that runner up has installed is in scope. This is the layer Ralph cannot pin, and the first place to look when two runners disagree.",
+    },
+  ],
   agentsHeading: "Agents",
   agentsBody:
     "An adapter is one file implementing a three-part contract. Adding an agent never touches the orchestrator.",

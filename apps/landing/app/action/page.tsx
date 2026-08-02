@@ -68,6 +68,41 @@ export default function ActionPage() {
             {pluggableContent.skillsNote}
           </p>
 
+          {/* Three sources reach the agent - only the pack is pinned */}
+          <h3 className="font-mono text-base font-bold text-light-text dark:text-text-primary pt-2">
+            {pluggableContent.layeringHeading}
+          </h3>
+          <p className="text-sm md:text-base text-light-text-muted dark:text-text-muted leading-relaxed">
+            {pluggableContent.layeringBody}
+          </p>
+
+          <ol className="space-y-3">
+            {pluggableContent.layers.map((layer) => (
+              <li
+                key={layer.source}
+                className="rounded-md border border-light-border dark:border-dark-border p-4"
+              >
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
+                  <h4 className="font-mono text-sm font-medium text-light-text dark:text-text-primary">
+                    {layer.source}
+                  </h4>
+                  <span
+                    className={`font-mono text-[11px] rounded px-1.5 py-0.5 border ${
+                      layer.badge === "not pinned"
+                        ? "text-accent-pink border-accent-pink/40"
+                        : "text-accent-yellow border-accent-yellow/40"
+                    }`}
+                  >
+                    {layer.badge}
+                  </span>
+                </div>
+                <p className="text-sm text-light-text-muted dark:text-text-muted leading-relaxed">
+                  {layer.detail}
+                </p>
+              </li>
+            ))}
+          </ol>
+
           <h3 className="font-mono text-base font-bold text-light-text dark:text-text-primary pt-2">
             {pluggableContent.agentsHeading}
           </h3>
