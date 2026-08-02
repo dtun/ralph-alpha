@@ -24,7 +24,9 @@ jobs:
       issues: write
 
     steps:
-      - uses: dtun/ralph-alpha/packages/action@v1
+      # v0 moves as fixes land and may break between releases.
+      # Pin a SHA if you need it to stay put.
+      - uses: dtun/ralph-alpha/packages/action@v0
         with:
           verify: npm test
           timeout-minutes: 45

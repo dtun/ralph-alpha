@@ -76,6 +76,21 @@ the workflow's `if:` to match the right-hand column of `triage-labels.md`.
 
 Then copy [`examples/ralph.yml`](./examples/ralph.yml) into `.github/workflows/`.
 
+## Versioning
+
+```yaml
+- uses: dtun/ralph-alpha/packages/action@v0
+```
+
+**`v0` means no stability promise.** Inputs may be renamed and behaviour may
+change between releases while the design is still being proven on real runs.
+The tag moves as fixes land, so you get them without editing your workflow —
+and you inherit breaking changes the same way. Pin a commit SHA instead if you
+need a workflow that cannot shift under you.
+
+`v1` will mean the inputs have settled. It does not exist yet, and the
+[unverified assumption](#unverified) below is why.
+
 ## Inputs
 
 | Input             | Default             | Notes                                                                  |
@@ -194,6 +209,20 @@ useful outcome rather than a wasted one.
 - **Budget exhausted** — the work so far ships as a draft, flagged on the PR.
 - **`verify` fails** — draft PR with the tail of the output in the body.
 - **No agent brief** — runs conservatively, flags it prominently.
+
+## Unverified
+
+**Nothing here has been proven on a real runner yet.** One assumption carries
+the rest: that passing an entry skill in print mode — `claude -p "/implement …"`
+— actually _resolves_ the skill rather than treating it as literal text.
+Everything else is plumbing around that.
+
+It is reasoning, not evidence. In print mode the prompt is a user turn, so a
+user-invoked skill should resolve, but that has not been observed end to end. If
+it turns out false, the fix is inlining the skill body into the prompt and the
+rest of the design stands.
+
+Verify it before trusting a run. This is why the tag is `v0`.
 
 ## Known gaps
 
