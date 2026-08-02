@@ -36,7 +36,7 @@ export const componentsContent: PlayerData[] = [
   {
     id: "skills",
     title: "Skill Pack",
-    description: "Brings the playbook.",
+    description: "A default playbook. Or yours.",
   },
   {
     id: "agents",
@@ -89,9 +89,9 @@ export const unifiedSteps: UnifiedStep[] = [
     label: "AI Codes",
     description: "Your coding agent iterates through the task",
     details:
-      "Ralph installs a pinned skill pack and hands the agent the brief. The pack owns the workflow: test, iterate, review. Swap the pack or the agent — neither is baked in.",
-    code: `skills-ref: v1.1.0   # the playbook
-agent: claude        # or codex, opencode, pi`,
+      "Ralph installs a pinned skill pack and hands the agent the brief. The pack owns the workflow: test, iterate, review. A real pack ships as the default — swap it, or the agent, without touching Ralph.",
+    code: `skills-repo: mattpocock/skills   # the default
+agent: claude                    # or codex, opencode, pi`,
     codeLanguage: "yaml",
     playerIds: ["skills", "claude", "codex", "opencode", "pi"],
     anchor: "pack",

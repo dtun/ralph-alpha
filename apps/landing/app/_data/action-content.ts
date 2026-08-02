@@ -31,7 +31,7 @@ export const pipelineStages: PipelineStage[] = [
     id: "pack",
     label: "Install the pinned skill pack",
     detail:
-      "Cloned at a fixed ref and copied into the workspace, then excluded via .git/info/exclude so it never lands in the agent's diff.",
+      "Defaults to mattpocock/skills at a pinned tag. Cloned, copied into the workspace, then excluded via .git/info/exclude so it never lands in the agent's diff. Point it at your own pack and the rest of the pipeline is unchanged.",
     seam: "skills-repo · skills-ref",
   },
   {
@@ -53,6 +53,7 @@ export interface OwnershipColumn {
   title: string;
   caption: string;
   points: string[];
+  note?: string;
 }
 
 export const ownershipContent: {
@@ -80,6 +81,7 @@ export const ownershipContent: {
       "When the work is done",
       "What counts as a review worth passing",
     ],
+    note: "Ships pointed at mattpocock/skills, pinned. Point skills-repo somewhere else and nothing on the left changes.",
   },
 };
 
@@ -134,9 +136,18 @@ agent_preflight()          # exit non-zero with a fixable message if the
 agent_run <prompt_file>    # run to completion against $PWD, non-interactive
                            # must forward "\${AGENT_ARGS_ARR[@]}"`;
 
-export const agentsContent = {
-  heading: "Bring your own agent",
-  body: "An adapter is one file implementing a three-part contract. Adding an agent never touches the orchestrator.",
+export const pluggableContent = {
+  heading: "Defaults in the box, nothing welded shut",
+  body: "Ralph ships pointed at a real skill pack and a real agent, so the zero-config path works on day one. Neither is baked in. Both are inputs, and changing either is one line of YAML.",
+  defaults: `# what you get without configuring anything
+skills-repo: mattpocock/skills
+skills-ref:  v1.1.0
+agent:       claude`,
+  skillsNote:
+    "The pack is the bigger lever of the two. It decides how work gets planned, where tests go, and when something is done — so pointing skills-repo at your own pack changes how every agent behaves without changing a line of the orchestrator.",
+  agentsHeading: "Agents",
+  agentsBody:
+    "An adapter is one file implementing a three-part contract. Adding an agent never touches the orchestrator.",
   agents: ["claude", "codex", "opencode", "pi"],
   note: "pi is the one worth calling out. It already reads .agents/skills — the same path this action installs packs into — so a pack drops in with no special-casing at all. It is also multi-provider, which makes it the one adapter where bring-your-own-agent extends to bring-your-own-model.",
 };

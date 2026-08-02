@@ -14,7 +14,7 @@ import {
   loopContent,
   afkContent,
   adapterContract,
-  agentsContent,
+  pluggableContent,
   trapsContent,
   fileMapContent,
   statusContent,
@@ -53,17 +53,30 @@ export default function ActionPage() {
           gates={afkContent.gates}
         />
 
-        {/* Bring your own agent */}
+        {/* Defaults, and the two axes that swap */}
         <section className="space-y-5">
           <h2 className="font-mono text-xl md:text-2xl font-bold text-accent-yellow">
-            {agentsContent.heading}
+            {pluggableContent.heading}
           </h2>
           <p className="text-sm md:text-base text-light-text-muted dark:text-text-muted leading-relaxed">
-            {agentsContent.body}
+            {pluggableContent.body}
+          </p>
+
+          <CodeBlock code={pluggableContent.defaults} filename="ralph.yml" />
+
+          <p className="text-sm md:text-base text-light-text-muted dark:text-text-muted leading-relaxed">
+            {pluggableContent.skillsNote}
+          </p>
+
+          <h3 className="font-mono text-base font-bold text-light-text dark:text-text-primary pt-2">
+            {pluggableContent.agentsHeading}
+          </h3>
+          <p className="text-sm md:text-base text-light-text-muted dark:text-text-muted leading-relaxed">
+            {pluggableContent.agentsBody}
           </p>
 
           <ul className="flex flex-wrap gap-2">
-            {agentsContent.agents.map((agent) => (
+            {pluggableContent.agents.map((agent) => (
               <li
                 key={agent}
                 className="font-mono text-sm text-light-text dark:text-text-primary border border-light-border dark:border-dark-border rounded px-3 py-1"
@@ -76,7 +89,7 @@ export default function ActionPage() {
           <CodeBlock code={adapterContract} filename="adapter contract" />
 
           <p className="text-sm md:text-base text-light-text-muted dark:text-text-muted leading-relaxed">
-            {agentsContent.note}
+            {pluggableContent.note}
           </p>
         </section>
 

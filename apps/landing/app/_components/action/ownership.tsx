@@ -44,6 +44,12 @@ function Column({
           </li>
         ))}
       </ul>
+
+      {column.note && (
+        <p className="mt-5 pt-4 border-t border-light-border dark:border-dark-border text-sm text-light-text-muted dark:text-text-subtle leading-relaxed">
+          {column.note}
+        </p>
+      )}
     </div>
   );
 }
