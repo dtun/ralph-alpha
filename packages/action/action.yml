@@ -67,11 +67,18 @@ inputs:
 
   github-token:
     description: >-
-      Token for issue and PR operations. Note: PRs opened with the default
-      GITHUB_TOKEN do not trigger pull_request workflows, so your CI will not
-      run on Ralph's PRs. Pass a PAT or GitHub App token to get CI.
+      Token for issue and PR operations. Falls back to the workflow's own
+      GITHUB_TOKEN. Note: PRs opened with the default GITHUB_TOKEN do not
+      trigger pull_request workflows, so your CI will not run on Ralph's PRs.
+      Pass a PAT or GitHub App token to get CI.
     required: false
-    default: ${{ github.token }}
+    # Left empty rather than defaulting to ${{ github.token }} so that "the
+    # caller passed a token" stays distinguishable from "nobody did". This is
+    # the last point where those two cases look different: once the default is
+    # applied, every consumer downstream sees an indistinguishable token
+    # string, and the only way to tell them apart again would be to compare
+    # secret values. Each use site falls back below.
+    default: ""
 
 outputs:
   status:
@@ -92,7 +99,7 @@ runs:
       with:
         ref: ${{ inputs.base }}
         fetch-depth: 0
-        token: ${{ inputs.github-token }}
+        token: ${{ inputs.github-token || github.token }}
 
     - name: Install skill pack
       shell: bash
@@ -101,7 +108,7 @@ runs:
         SKILLS_REF: ${{ inputs.skills-ref }}
         SKILLS: ${{ inputs.skills }}
         AGENT: ${{ inputs.agent }}
-        GH_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ inputs.github-token || github.token }}
       run: ${{ github.action_path }}/scripts/install-skills.sh
 
     - name: Run Ralph
@@ -120,5 +127,6 @@ runs:
         RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         RUNNER_LABEL: ${{ runner.name }}
         ACTION_PATH: ${{ github.action_path }}
-        GH_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ inputs.github-token || github.token }}
+        TOKEN_SUPPLIED: ${{ inputs.github-token != '' }}
       run: ${{ github.action_path }}/scripts/ralph.sh
