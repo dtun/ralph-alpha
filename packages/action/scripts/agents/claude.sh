@@ -24,9 +24,17 @@ agent_preflight() {
 
 agent_run() {
   local prompt_file="$1"
+  # The prompt goes in on stdin, not argv.
+  #
+  # --add-dir takes <directories...> and is variadic, so a positional prompt
+  # after it is swallowed as another directory and claude exits with "Input
+  # must be provided either through stdin or as a prompt argument". $PWD is
+  # already the working directory, so --add-dir was redundant regardless.
+  #
+  # stdin is also the safer channel: a preamble plus a long brief can run to
+  # several KB, which argv should not have to carry.
   claude --print \
     --permission-mode acceptEdits \
-    --add-dir "$PWD" \
     ${AGENT_ARGS_ARR[@]+"${AGENT_ARGS_ARR[@]}"} \
-    "$(cat "$prompt_file")"
+    < "$prompt_file"
 }
