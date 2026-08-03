@@ -89,7 +89,7 @@ and you inherit breaking changes the same way. Pin a commit SHA instead if you
 need a workflow that cannot shift under you.
 
 `v1` will mean the inputs have settled. It does not exist yet, and the
-[unverified assumption](#unverified) below is why.
+[open questions](#what-has-actually-been-observed) below are why.
 
 ## Inputs
 
@@ -210,19 +210,29 @@ useful outcome rather than a wasted one.
 - **`verify` fails** — draft PR with the tail of the output in the body.
 - **No agent brief** — runs conservatively, flags it prominently.
 
-## Unverified
+## What has actually been observed
 
-**Nothing here has been proven on a real runner yet.** One assumption carries
-the rest: that passing an entry skill in print mode — `claude -p "/implement …"`
-— actually _resolves_ the skill rather than treating it as literal text.
-Everything else is plumbing around that.
+**Skills resolve in print mode.** This is the assumption the whole design
+rested on. A project-scoped skill placed in `.claude/skills/` and invoked as
+`/name` through `claude --print` on stdin runs — confirmed against Claude Code
+2.1.220 with a canary skill whose only job was to prove it.
 
-It is reasoning, not evidence. In print mode the prompt is a user turn, so a
-user-invoked skill should resolve, but that has not been observed end to end. If
-it turns out false, the fix is inlining the skill body into the prompt and the
-rest of the design stands.
+**The pipeline runs on a real self-hosted runner.** Checkout, pinned pack
+install, brief extraction from a live issue, branch creation and the
+no-commits path have all executed on macOS/arm64.
 
-Verify it before trusting a run. This is why the tag is `v0`.
+Still unobserved:
+
+- **A complete run ending in a pull request.** Every stage has run; they have
+  not yet run in sequence all the way to one.
+- **Whether the output is worth reviewing.** Whether the entry skill reliably
+  produces mergeable work, and whether `ASSUMPTIONS.md` records decisions a
+  reviewer actually wants, is a question about the skill pack and the preamble
+  rather than the orchestrator. It needs a sample, not a single run.
+- **More than one runner.** The multiplayer claim has never been tested with
+  two machines.
+
+The tag stays `v0` until the input names have settled.
 
 ## Known gaps
 
