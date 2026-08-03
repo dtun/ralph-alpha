@@ -20,6 +20,7 @@ RUNNER_LABEL="${RUNNER_LABEL:-unknown}"
 ACTION_PATH="${ACTION_PATH:?}"
 
 BRANCH="ralph/${ISSUE_NUMBER}/${RUN_NUMBER}"
+RALPH_DIR=".ralph"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -104,6 +105,15 @@ git checkout -q -b "$BRANCH"
 START_SHA="$(git rev-parse HEAD)"
 emit "branch" "$BRANCH"
 
+# Run artifacts live here, outside the diff. They are written for the human
+# reviewing the PR and Ralph lifts them into the PR body, so committing them
+# too would show the reviewer the same text twice and leave a file that has to
+# be deleted before every merge. Excluded rather than gitignored so the
+# consumer's tracked files are untouched.
+mkdir -p "$RALPH_DIR"
+mkdir -p .git/info
+grep -qxF "$RALPH_DIR/" .git/info/exclude 2>/dev/null || echo "$RALPH_DIR/" >> .git/info/exclude
+
 # ------------------------------------------------------------------ prompt ---
 
 # Placeholders are substituted with values we control (a ref name and an
@@ -133,7 +143,7 @@ sed -e "s|{{BASE_REF}}|${BASE_REF}|g" \
   else
     echo "> No agent brief was posted on this issue. Treat the body below as the"
     echo "> specification, and be conservative: implement what is clearly asked and"
-    echo "> nothing more. Record everything you inferred in ASSUMPTIONS.md."
+    echo "> nothing more. Record everything you inferred in .ralph/ASSUMPTIONS.md."
     echo
     cat "$WORK/body.md"
   fi
@@ -206,9 +216,9 @@ say "${COMMITS} commit(s) on ${BRANCH}"
 
 BLOCKED=false
 BLOCKED_TEXT=""
-if [ -f "BLOCKED.md" ]; then
+if [ -f "$RALPH_DIR/BLOCKED.md" ]; then
   BLOCKED=true
-  BLOCKED_TEXT="$(cat BLOCKED.md)"
+  BLOCKED_TEXT="$(cat "$RALPH_DIR/BLOCKED.md")"
   say "Agent reported blocked."
 fi
 
@@ -249,7 +259,7 @@ fi
 git push -q origin "$BRANCH"
 
 ASSUMPTIONS=""
-[ -f "ASSUMPTIONS.md" ] && ASSUMPTIONS="$(cat ASSUMPTIONS.md)"
+[ -f "$RALPH_DIR/ASSUMPTIONS.md" ] && ASSUMPTIONS="$(cat "$RALPH_DIR/ASSUMPTIONS.md")"
 
 {
   echo "Closes #${ISSUE_NUMBER}"
@@ -273,7 +283,6 @@ ASSUMPTIONS=""
   echo
   echo "🤖 Ralph · agent \`${AGENT}\` · skills \`${SKILLS_RESOLVED_SHA:-unknown}\` · runner \`${RUNNER_LABEL}\` · [run log](${RUN_URL})"
   echo
-  echo "\`ASSUMPTIONS.md\` and \`BLOCKED.md\` are run artifacts — delete them before merging."
 } > "$WORK/pr-body.md"
 
 PR_ARGS=(--title "$ISSUE_TITLE" --body-file "$WORK/pr-body.md" --base "$BASE_REF" --head "$BRANCH")

@@ -20,7 +20,8 @@ issue labeled ready-for-agent
   agent runs /implement        ← claude | codex | opencode | pi
         │
         ▼
-  draft PR + ASSUMPTIONS.md    ← back on the issue thread
+  draft PR + a written    ← back on the issue thread
+  record of every call
 ```
 
 ## Why it triggers on `ready-for-agent`
@@ -186,17 +187,24 @@ to ask, so a naive run either stalls or silently invents an answer.
 The preamble converts each interactive gate into a recorded decision:
 
 - **Seam agreement** → derive seams from the brief's acceptance criteria, and
-  write the chosen seams into `ASSUMPTIONS.md` before the first test.
+  write the chosen seams into `.ralph/ASSUMPTIONS.md` before the first test.
 - **Review fixed point** → the base ref, no question asked.
-- **Spec location** → the Agent Brief, reproduced in `ASSUMPTIONS.md`.
+- **Spec location** → the Agent Brief, reproduced in `.ralph/ASSUMPTIONS.md`.
 - **Anything else** → make the call, record it with one line of reasoning.
 
-`ASSUMPTIONS.md` then lands in the PR body, so the review starts with _"here is
+That report lands in the PR body, so the review starts with _"here is
 every judgment call I made without you"_. That artifact is the point. An
 unrecorded assumption is indistinguishable from a bug to whoever reviews this.
 
+Both files live under `.ralph/`, which Ralph excludes from git for the run.
+They are written _for the reviewer_, and Ralph lifts them into the PR
+description — so committing them as well would show the same text twice and
+leave a file to delete before every merge. The report belongs in the review,
+not in the repository.
+
 The preamble also draws a line: ambiguity gets an assumption, but a genuine
-block — a product decision, a missing credential — gets `BLOCKED.md` and a stop.
+block — a product decision, a missing credential — gets `.ralph/BLOCKED.md` and
+a stop.
 Ralph turns that into a draft PR with the question on it, so a blocked run is a
 useful outcome rather than a wasted one.
 
@@ -226,7 +234,7 @@ Still unobserved:
 - **A complete run ending in a pull request.** Every stage has run; they have
   not yet run in sequence all the way to one.
 - **Whether the output is worth reviewing.** Whether the entry skill reliably
-  produces mergeable work, and whether `ASSUMPTIONS.md` records decisions a
+  produces mergeable work, and whether the assumptions report records decisions a
   reviewer actually wants, is a question about the skill pack and the preamble
   rather than the orchestrator. It needs a sample, not a single run.
 - **More than one runner.** The multiplayer claim has never been tested with

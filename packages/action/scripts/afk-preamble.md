@@ -2,7 +2,8 @@
 
 You are running unattended on a CI runner. No human will read your questions or
 answer them. Nothing you print to the terminal will be seen. The only artifacts
-that survive are **commits**, **`ASSUMPTIONS.md`**, and **`BLOCKED.md`**.
+that survive are **commits**, **`.ralph/ASSUMPTIONS.md`**, and
+**`.ralph/BLOCKED.md`**.
 
 The skills you are about to use were written for an interactive session, so
 several of them will tell you to confirm something with the user. That
@@ -39,20 +40,23 @@ is a product decision, and product decisions are blocks — see below.
 - **Agreeing test seams** (`/tdd` requires pre-agreed seams): derive them from
   the acceptance criteria. Each criterion is an observable behaviour, so the
   public interface it is observed through is the seam. Write the seams you chose
-  into `ASSUMPTIONS.md` before you write the first test.
+  into `.ralph/ASSUMPTIONS.md` before you write the first test.
 - **Choosing a review fixed point** (`/code-review` asks for one): use
   `{{BASE_REF}}`. Do not ask.
 - **Locating the spec** (`/code-review` looks for the originating spec): it is
-  the Agent Brief below, reproduced in `ASSUMPTIONS.md`.
+  the Agent Brief below, reproduced in `.ralph/ASSUMPTIONS.md`.
 - **Any other "confirm with the user" step**: make the call a competent engineer
-  on this codebase would make, then record it in `ASSUMPTIONS.md` with one line
+  on this codebase would make, then record it in `.ralph/ASSUMPTIONS.md` with one line
   of reasoning. Recording it is not optional — an unrecorded assumption is
   indistinguishable from a bug to the human reviewing this.
 
-## `ASSUMPTIONS.md`
+## `.ralph/ASSUMPTIONS.md`
 
-Create it at the repo root. It is read by the human reviewing your PR and is
-deleted before merge. Structure:
+Write it at that exact path. `.ralph/` is Ralph's scratch directory: it is
+excluded from git, so nothing you put there is committed or shows up in the
+diff. Ralph reads this file and lifts it into the pull request description,
+which is where the reviewer actually sees it — so write it for them, not for
+the repository. Structure:
 
 ```markdown
 # Assumptions — Issue #{{ISSUE_NUMBER}}
@@ -85,12 +89,12 @@ are blocked when either of these holds:
   implementing something you have reason to believe is wrong.
 
 It does not mean the work is hard or ambiguous; ambiguity is what
-`ASSUMPTIONS.md` is for. "The brief is unambiguous" is not a reason to
+`.ralph/ASSUMPTIONS.md` is for. "The brief is unambiguous" is not a reason to
 implement it — an unambiguous instruction can still be an unambiguously wrong
 one, and following it precisely makes the outcome worse, not better.
 
 If you are genuinely blocked: commit whatever partial work is coherent, write
-`BLOCKED.md` at the repo root stating the single specific question that would
+`.ralph/BLOCKED.md` stating the single specific question that would
 unblock you, what you checked, and what you believe the real cause is. Then
 stop. A clear block is a good outcome. A guess at a product decision is not,
 and neither is a faithful implementation of a mistake.
@@ -101,5 +105,8 @@ and neither is a faithful implementation of a mistake.
   with `(#{{ISSUE_NUMBER}})` at the end of each subject line.
 - Do not modify anything under `.claude/skills/` or `.agents/skills/` — that is
   the pinned skill pack, not source code.
+- Never commit anything under `.ralph/`, and never write your report anywhere
+  else. A report committed into the repository is one the reviewer has to
+  delete before they can merge.
 - Do not push, open a pull request, or alter git remotes. Ralph does that.
 - Do not modify CI workflows unless the brief explicitly asks for it.
