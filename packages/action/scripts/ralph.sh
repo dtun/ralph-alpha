@@ -76,7 +76,14 @@ ISSUE_TITLE="$(jq -r '.title' "$WORK/issue.json")"
 jq -r '.body // ""' "$WORK/issue.json" > "$WORK/body.md"
 
 # The most recent Agent Brief comment wins — briefs get revised during triage.
-jq -r '[.comments[]? | select(.body | test("^#+ *Agent Brief"; "m"))] | last | .body // ""' \
+#
+# The (^|\n) alternation is load-bearing. jq anchors ^ to the start of the
+# whole string, not the start of a line, and its "m" flag means dot-matches-
+# newline rather than multiline anchors. A plain ^ therefore only matched a
+# brief whose comment *began* with the heading — but the triage skill requires
+# every comment it posts to open with an AI disclaimer line, so in practice it
+# matched none of them and every triaged issue silently fell back to no-brief.
+jq -r '[.comments[]? | select(.body | test("(^|\n)#+ *Agent Brief"))] | last | .body // ""' \
   "$WORK/issue.json" > "$WORK/brief.md"
 
 # Not [ -s ]: jq writes a trailing newline even for an empty result, so an
