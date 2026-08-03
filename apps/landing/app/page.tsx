@@ -26,7 +26,7 @@ import {
 const iconMap: Record<string, React.ReactNode> = {
   runners: <LaptopIcon />,
   actions: <WorkflowIcon />,
-  ralph: <TerminalIcon />,
+  skills: <TerminalIcon />,
   agents: <SparklesIcon />,
 };
 

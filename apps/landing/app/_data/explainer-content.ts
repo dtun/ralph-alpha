@@ -34,9 +34,9 @@ export const componentsContent: PlayerData[] = [
     description: "Orchestrates the magic.",
   },
   {
-    id: "ralph",
-    title: "Ralph Script",
-    description: "Keeps the AI in the loop.",
+    id: "skills",
+    title: "Skill Pack",
+    description: "A default playbook. Or yours.",
   },
   {
     id: "agents",
@@ -44,7 +44,9 @@ export const componentsContent: PlayerData[] = [
     description: "Does the actual coding.",
     subPlayers: [
       { id: "claude", label: "Claude Code" },
+      { id: "codex", label: "Codex" },
       { id: "opencode", label: "OpenCode" },
+      { id: "pi", label: "Pi" },
     ],
   },
 ];
@@ -57,6 +59,7 @@ export interface UnifiedStep {
   code?: string;
   codeLanguage?: string;
   playerIds: string[]; // Which players are active for this step
+  anchor?: string; // Matching stage on /action, for the deep link
 }
 
 export const unifiedSteps: UnifiedStep[] = [
@@ -64,11 +67,12 @@ export const unifiedSteps: UnifiedStep[] = [
     label: "Trigger",
     description: "Someone kicks off an AI task",
     details:
-      "Via GitHub Actions UI, CLI command, or Slack bot. The task gets queued as a workflow_dispatch event.",
-    code: `gh workflow run ai-pair.yml \\
-  -f task="Add input validation"`,
+      "Label an issue and the workflow fires. Triage decides when something is ready — Ralph only picks up what a human already marked.",
+    code: `gh issue edit 42 \\
+  --add-label ready-for-agent`,
     codeLanguage: "bash",
     playerIds: ["actions"],
+    anchor: "trigger",
   },
   {
     label: "Runner Claims",
@@ -79,18 +83,18 @@ export const unifiedSteps: UnifiedStep[] = [
 # Any registered runner can claim this`,
     codeLanguage: "yaml",
     playerIds: ["runners"],
+    anchor: "claim",
   },
   {
     label: "AI Codes",
     description: "Your coding agent iterates through the task",
     details:
-      "The ralph.sh script runs your coding agent in a loop: plan → code → test → reflect. Repeats until done or stuck.",
-    code: `for i in $(seq 1 $MAX_ITERATIONS); do
-  $CODING_AGENT --prompt-file prompt.txt
-  npm test
-done`,
-    codeLanguage: "bash",
-    playerIds: ["ralph", "claude", "opencode"],
+      "Ralph installs a pinned skill pack and hands the agent the brief. The pack owns the workflow: test, iterate, review. A real pack ships as the default — swap it, or the agent, without touching Ralph.",
+    code: `skills-repo: mattpocock/skills   # the default
+agent: claude                    # or codex, opencode, pi`,
+    codeLanguage: "yaml",
+    playerIds: ["skills", "claude", "codex", "opencode", "pi"],
+    anchor: "pack",
   },
   {
     label: "PR & Review",
@@ -102,6 +106,7 @@ done`,
   --base main`,
     codeLanguage: "bash",
     playerIds: ["actions"],
+    anchor: "review",
   },
 ];
 
