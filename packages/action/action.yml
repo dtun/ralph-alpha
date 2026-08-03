@@ -40,6 +40,16 @@ inputs:
     required: false
     default: ""
 
+  setup:
+    description: >-
+      Command run in the repository root after checkout and skill install,
+      before the agent. This action owns the checkout, so a step of your own
+      would run before the repo exists — this is the only place dependencies
+      can be installed. The agent and `verify` both inherit what it produces.
+      Non-zero fails the run before the agent starts.
+    required: false
+    default: ""
+
   command:
     description: "Skill invocation that does the work. The agent brief is appended as context."
     required: false
@@ -103,6 +113,15 @@ runs:
         AGENT: ${{ inputs.agent }}
         GH_TOKEN: ${{ inputs.github-token }}
       run: ${{ github.action_path }}/scripts/install-skills.sh
+
+    # Its own step rather than a line in ralph.sh, so a broken install fails
+    # here — named, with its own log — instead of a third of the way through
+    # Ralph's output, after the issue has already been told a run is underway.
+    # Skipped entirely when unset, so nothing runs and nothing is logged.
+    - name: Set up workspace
+      if: inputs.setup != ''
+      shell: bash
+      run: ${{ inputs.setup }}
 
     - name: Run Ralph
       id: ralph

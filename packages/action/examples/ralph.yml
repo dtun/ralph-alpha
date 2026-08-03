@@ -28,6 +28,9 @@ jobs:
       # Pin a SHA if you need it to stay put.
       - uses: dtun/ralph-alpha/packages/action@v0
         with:
+          # The action checks out for you, so a step of your own would run
+          # before the repo exists. Install dependencies here instead.
+          setup: npm ci
           verify: npm test
           timeout-minutes: 45
 
