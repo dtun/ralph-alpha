@@ -246,8 +246,11 @@ The tag stays `v0` until the input names have settled.
 
 - **Isolation.** The agent runs with write access to the workspace and inherits
   the runner's `gh` and agent credentials. On a shared laptop that is a real
-  blast radius. Use a dedicated runner account now; containers are the answer
-  for anyone with a security review.
+  blast radius.
+  [**A least-privilege runner**](./docs/least-privilege-runner.md) is the
+  runbook for cutting that down to one repository — and is equally clear about
+  what a dedicated account still leaves exposed. Containers are the stronger
+  answer, and awkward on macOS for reasons the same page covers.
 - **CI on Ralph's PRs.** GitHub does not trigger `pull_request` workflows for
   PRs opened with `GITHUB_TOKEN`. Pass a PAT or App token via `github-token`.
 - **Marketplace.** Listing requires `action.yml` at a repo root, so this needs
