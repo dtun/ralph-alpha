@@ -77,6 +77,55 @@ the workflow's `if:` to match the right-hand column of `triage-labels.md`.
 
 Then copy [`examples/ralph.yml`](./examples/ralph.yml) into `.github/workflows/`.
 
+## CI on Ralph's pull requests
+
+Read this before you merge anything Ralph opens.
+
+GitHub will not trigger `pull_request` workflows for a pull request opened with
+the default `GITHUB_TOKEN`. The restriction exists to stop a workflow triggering
+itself forever, and it applies whatever your permissions say. So on the default
+token Ralph's PRs arrive with no checks at all — and a PR with no checks looks a
+lot like a PR whose checks passed, especially in a list. That inverts the whole
+safety story: the one change nobody wrote by hand becomes the only change
+arriving unverified.
+
+Ralph will not let that pass quietly. A run on the default token says so in the
+log, and again on the pull request body alongside its other warnings, where the
+reviewer is already looking. The fix is to open the PR as something other than
+the workflow itself, which means one of two tokens.
+
+**A GitHub App** is the better answer for anything shared. It is scoped to the
+repositories you install it on, revocable without touching a person's account,
+consumes no seat, and its token is minted per run and expires in an hour:
+
+```yaml
+- uses: actions/create-github-app-token@v1
+  id: app-token
+  with:
+    app-id: ${{ vars.RALPH_APP_ID }}
+    private-key: ${{ secrets.RALPH_APP_PRIVATE_KEY }}
+
+- uses: dtun/ralph-alpha/packages/action@v0
+  with:
+    github-token: ${{ steps.app-token.outputs.token }}
+```
+
+Grant it repository permissions **Contents: read & write**, **Pull requests:
+read & write**, and **Issues: read & write** — Ralph pushes a branch, opens the
+PR, and comments on the issue.
+
+**A fine-grained PAT** is the quicker answer, and fine for a repo you own alone.
+Same three permissions, stored as a repository secret:
+
+```yaml
+- uses: dtun/ralph-alpha/packages/action@v0
+  with:
+    github-token: ${{ secrets.RALPH_PAT }}
+```
+
+The tradeoff is that every branch, PR and comment Ralph produces is attributed
+to you personally, and the run breaks on whatever day the token expires.
+
 ## Versioning
 
 ```yaml
@@ -107,7 +156,7 @@ need a workflow that cannot shift under you.
 | `verify`          | —                   | outer guard; failure forces draft                                      |
 | `timeout-minutes` | `45`                | wall-clock budget                                                      |
 | `draft`           | `true`              |                                                                        |
-| `github-token`    | `github.token`      | pass a PAT to get CI on Ralph's PRs                                    |
+| `github-token`    | `github.token`      | App or PAT — [without one, no CI runs](#ci-on-ralphs-pull-requests)    |
 
 Outputs: `status` (`success` \| `blocked` \| `no-changes` \| `failed`),
 `pr-url`, `branch`.
@@ -249,7 +298,9 @@ The tag stays `v0` until the input names have settled.
   blast radius. Use a dedicated runner account now; containers are the answer
   for anyone with a security review.
 - **CI on Ralph's PRs.** GitHub does not trigger `pull_request` workflows for
-  PRs opened with `GITHUB_TOKEN`. Pass a PAT or App token via `github-token`.
+  PRs opened with `GITHUB_TOKEN`, so the default configuration ships PRs no CI
+  has seen. A run says so on its own PR, but saying so is not fixing it —
+  [pass an App or PAT token](#ci-on-ralphs-pull-requests).
 - **Marketplace.** Listing requires `action.yml` at a repo root, so this needs
   to move to its own repo before it can be listed. `owner/repo/path@ref` works
   fine in the meantime.

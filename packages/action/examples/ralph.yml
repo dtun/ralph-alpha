@@ -37,5 +37,6 @@ jobs:
           skills-ref: v1.1.0
 
           # The default GITHUB_TOKEN does not trigger pull_request workflows,
-          # so CI will not run on Ralph's PRs. Pass a PAT to get CI.
+          # so CI will not run on Ralph's PRs and the PR says so. Pass a PAT
+          # or a GitHub App token to get CI — see the README.
           # github-token: ${{ secrets.RALPH_PAT }}

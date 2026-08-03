@@ -18,6 +18,7 @@ RUN_NUMBER="${RUN_NUMBER:-0}"
 RUN_URL="${RUN_URL:-}"
 RUNNER_LABEL="${RUNNER_LABEL:-unknown}"
 ACTION_PATH="${ACTION_PATH:?}"
+TOKEN_SUPPLIED="${TOKEN_SUPPLIED:-false}"
 
 BRANCH="ralph/${ISSUE_NUMBER}/${RUN_NUMBER}"
 RALPH_DIR=".ralph"
@@ -66,6 +67,19 @@ else
   TIMEOUT_BIN=""
   say "warning: no timeout(1) on this runner (brew install coreutils on macOS)."
   say "         Falling back to the job-level timeout only."
+fi
+
+# GitHub will not trigger pull_request workflows for a PR opened with the
+# default GITHUB_TOKEN, so on the default token this run ends in a pull request
+# that no CI has ever looked at — and one that is indistinguishable from a
+# checked one unless it says so. Warn at the top of the run as well as on the
+# PR, so whoever is watching the log knows before the review starts.
+#
+# The flag comes from action.yml because that is the last place the caller's
+# intent survives: the token itself carries no mark of where it came from.
+if [ "$TOKEN_SUPPLIED" != true ]; then
+  say "warning: running on the default GITHUB_TOKEN — no workflows will run on the PR this opens."
+  say "         Pass a PAT or GitHub App token as github-token to get CI."
 fi
 
 # ------------------------------------------------------------------ intake ---
@@ -304,6 +318,7 @@ ASSUMPTIONS=""
     echo
   fi
   [ "$HAS_BRIEF" = false ] && { echo "> ⚠️ No agent brief was on this issue. The agent worked from the raw body — check the scope carefully."; echo; }
+  [ "$TOKEN_SUPPLIED" != true ] && { echo "> ⚠️ **No CI will run on this pull request.** It was opened with the default \`GITHUB_TOKEN\`, and GitHub does not trigger \`pull_request\` workflows for those. Nothing here has been checked by anything but the agent. Pass a PAT or GitHub App token as \`github-token\` to get CI on Ralph's PRs."; echo; }
   if [ -n "$ASSUMPTIONS" ]; then
     echo "$ASSUMPTIONS"
     echo
