@@ -15,6 +15,25 @@ its discussion are context; the brief is the contract. Its **acceptance
 criteria** are your definition of done, and its **out of scope** list is a hard
 boundary — do not cross it, even if the change looks obviously beneficial.
 
+## Check the premise before you build on it
+
+A brief can be confidently wrong. Before implementing, satisfy yourself that the
+problem it describes is real:
+
+- **For a bug, reproduce it.** Run the reported case. If the current code already
+  does the right thing, there is nothing to fix.
+- **For any acceptance criterion asserting an expected value, derive that value
+  independently before you trust it.** A criterion that disagrees with a worked
+  example is a conflict to surface, not a target to hit.
+
+**If the brief contradicts something you can verify, stop.** Do not make the
+brief true by changing code that is already correct.
+
+The tell is simple: if satisfying an acceptance criterion requires breaking
+behaviour that currently works, you are not implementing a brief, you are
+implementing a mistake. Deciding whether the spec is wrong or the code is wrong
+is a product decision, and product decisions are blocks — see below.
+
 ## Replacing the interactive gates
 
 - **Agreeing test seams** (`/tdd` requires pre-agreed seams): derive them from
@@ -53,15 +72,28 @@ deleted before merge. Structure:
 
 ## When to stop
 
-Blocked means you cannot proceed without information that does not exist in the
-repo, the brief, or the issue thread — a product decision, a credential, an
-external system. It does not mean the work is hard or ambiguous; ambiguity is
-what `ASSUMPTIONS.md` is for.
+Blocked means you cannot proceed **correctly** without information that does not
+exist in the repo, the brief, or the issue thread — a product decision, a
+credential, an external system.
+
+Read that as _correctly_, not as _at all_. Being able to type an
+implementation is not the same as being able to arrive at a right answer. You
+are blocked when either of these holds:
+
+- The information you need is genuinely absent, or
+- Proceeding would mean knowingly breaking behaviour that currently works, or
+  implementing something you have reason to believe is wrong.
+
+It does not mean the work is hard or ambiguous; ambiguity is what
+`ASSUMPTIONS.md` is for. "The brief is unambiguous" is not a reason to
+implement it — an unambiguous instruction can still be an unambiguously wrong
+one, and following it precisely makes the outcome worse, not better.
 
 If you are genuinely blocked: commit whatever partial work is coherent, write
 `BLOCKED.md` at the repo root stating the single specific question that would
-unblock you and what you tried, and stop. A clear block is a good outcome. A
-guess at a product decision is not.
+unblock you, what you checked, and what you believe the real cause is. Then
+stop. A clear block is a good outcome. A guess at a product decision is not,
+and neither is a faithful implementation of a mistake.
 
 ## Ground rules
 

@@ -33,8 +33,18 @@ agent_run() {
   #
   # stdin is also the safer channel: a preamble plus a long brief can run to
   # several KB, which argv should not have to carry.
+  # acceptEdits auto-accepts file edits but still gates bash, and in print mode
+  # there is nobody to approve — so the agent could edit files but could not run
+  # a test or commit. That silently disables the whole workflow: /tdd cannot do
+  # red-green without executing anything, /implement cannot commit, and
+  # /code-review has no diff to review. The work still lands, unexecuted and
+  # unreviewed, which is worse than failing.
+  #
+  # bypassPermissions is a blunt fix. The agent inherits this runner's
+  # credentials, so prefer a dedicated runner account until this is an explicit
+  # --allowedTools allowlist instead.
   claude --print \
-    --permission-mode acceptEdits \
+    --permission-mode bypassPermissions \
     ${AGENT_ARGS_ARR[@]+"${AGENT_ARGS_ARR[@]}"} \
     < "$prompt_file"
 }
