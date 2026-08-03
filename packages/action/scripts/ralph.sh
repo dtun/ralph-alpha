@@ -222,13 +222,40 @@ if [ -f "$RALPH_DIR/BLOCKED.md" ]; then
   say "Agent reported blocked."
 fi
 
-if [ "$COMMITS" -eq 0 ]; then
+# Blocking is a decision, not an outcome, so it outranks the commit count —
+# the agent looked at the work and declined it, and that is what the caller
+# needs to react to. Below it, an agent that exited non-zero with nothing to
+# show for itself is a genuine error and must not be laundered into
+# "no-changes": a bug that died after two seconds once reported no-changes and
+# nobody noticed for days. Timeouts are excluded because they exit non-zero by
+# design, and a run that produced commits is judged on the commits, not on how
+# the process happened to end.
+if [ "$BLOCKED" = true ]; then
+  STATUS="blocked"
+elif [ "$COMMITS" -eq 0 ] && [ "$AGENT_STATUS" -ne 0 ] && [ "$TIMED_OUT" = false ]; then
+  STATUS="failed"
+elif [ "$COMMITS" -eq 0 ]; then
+  STATUS="no-changes"
+else
+  STATUS="success"
+fi
+say "Status: ${STATUS}"
+emit "status" "$STATUS"
+
+# A block with no commits still earns a PR. The BLOCKED.md the agent wrote is
+# the most considered thing the run produced — the reasoning and the options it
+# sees — and that belongs somewhere reviewable and closable, not at the bottom
+# of an issue thread. gh pr create refuses a branch that does not differ from
+# base, so an empty commit gives the PR something to hang on.
+if [ "$COMMITS" -eq 0 ] && [ "$BLOCKED" = true ]; then
+  say "Blocked with no commits — opening a PR to carry the block."
+  git commit -q --allow-empty -m "chore: ralph blocked, no changes made (#${ISSUE_NUMBER})"
+elif [ "$COMMITS" -eq 0 ]; then
   say "No commits produced — nothing to open a PR for."
-  emit "status" "no-changes"
   gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
 🤖 **Ralph made no changes.**
 
-The agent ran but produced no commits.$( [ "$TIMED_OUT" = true ] && echo " It hit the ${TIMEOUT_MINUTES}m budget first." )$( [ "$BLOCKED" = true ] && printf '\n\n%s' "$BLOCKED_TEXT" )
+The agent ran but produced no commits.$( [ "$TIMED_OUT" = true ] && echo " It hit the ${TIMEOUT_MINUTES}m budget first." )
 
 [Run log](${RUN_URL}) · this issue keeps its current labels.
 EOF
@@ -236,9 +263,11 @@ EOF
   exit 0
 fi
 
+# Nothing changed, so a verify run would only be grading the base ref, and a
+# red base would show up on the PR as if Ralph had broken it.
 VERIFY_OK=true
 VERIFY_OUTPUT=""
-if [ -n "$VERIFY_CMD" ]; then
+if [ -n "$VERIFY_CMD" ] && [ "$COMMITS" -gt 0 ]; then
   say "Verifying: ${VERIFY_CMD}"
   if VERIFY_OUTPUT="$(bash -c "$VERIFY_CMD" 2>&1)"; then
     say "Verify passed."
@@ -292,10 +321,11 @@ PR_URL="$(gh pr create "${PR_ARGS[@]}")"
 say "Opened ${PR_URL}"
 emit "pr_url" "$PR_URL"
 
+# The block text is on the PR already; repeating it here would mean the human
+# reads the same wall of text twice and then has to decide which copy to reply
+# to. Point at the PR instead and keep the conversation in one place.
 if [ "$BLOCKED" = true ]; then
-  emit "status" "blocked"
+  gh issue comment "$ISSUE_NUMBER" --body "🤖 **Ralph is blocked** — ${PR_URL} has the reasoning and the options it sees." > /dev/null
 else
-  emit "status" "success"
+  gh issue comment "$ISSUE_NUMBER" --body "🤖 **Ralph opened ${PR_URL}**$( [ "$PR_DRAFT" = "true" ] && echo " (draft — see the PR for why)" )" > /dev/null
 fi
-
-gh issue comment "$ISSUE_NUMBER" --body "🤖 **Ralph opened ${PR_URL}**$( [ "$PR_DRAFT" = "true" ] && echo " (draft — see the PR for why)" )" > /dev/null
