@@ -102,6 +102,7 @@ need a workflow that cannot shift under you.
 | `skills-repo`     | `mattpocock/skills` | any Agent Skills pack                                                  |
 | `skills-ref`      | `v1.1.0`            | always pin                                                             |
 | `skills`          | all                 | space-separated allowlist — must be transitively closed                |
+| `setup`           | —                   | runs before the agent — see [below](#why-there-is-a-setup-input)       |
 | `command`         | `/implement`        | entry skill                                                            |
 | `base`            | default branch      |                                                                        |
 | `verify`          | —                   | outer guard; failure forces draft                                      |
@@ -117,6 +118,35 @@ Skills invoke each other, so an allowlist has to include the whole chain —
 `/codebase-design` and `/domain-modeling`. Leaving the default empty installs
 all 28 non-deprecated skills and avoids the problem; narrow it only once you
 know what your entry skill actually reaches for.
+
+## Why there is a `setup` input
+
+Ralph does its own `actions/checkout` as its first step. That is convenient
+until you need `npm ci`, at which point it is a trap: any step you write before
+the action runs before the repo exists, and there is no step _inside_ it for
+you to write. So the agent arrives in a bare checkout with no dependencies, and
+`verify` grades that same tree afterwards.
+
+```yaml
+with:
+  setup: npm ci
+  verify: npm test
+```
+
+`setup` is the seam that ownership took away. It runs in the repository root
+after the pack is installed and before the agent, and both the agent and
+`verify` inherit whatever it leaves behind. It is a plain shell command, so
+`bundle install && bin/rails db:test:prepare` is as valid as `npm ci`.
+
+Failing loudly and early is most of the value. A missing lockfile stops the run
+there and then, in a step named for it, with npm's output attached — instead of
+surfacing forty minutes later as an agent that quietly could not run the tests
+and a draft PR nobody can explain.
+
+One thing to watch: whatever `setup` writes is in the working tree when the
+agent finishes, and Ralph sweeps untracked files into a commit so partial work
+is never lost. Build output your `.gitignore` does not already cover will land
+in the pull request.
 
 ## Your own skills, on top
 
