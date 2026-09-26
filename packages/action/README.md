@@ -107,6 +107,9 @@ need a workflow that cannot shift under you.
 | `verify`          | —                   | outer guard; failure forces draft                                      |
 | `timeout-minutes` | `45`                | wall-clock budget                                                      |
 | `draft`           | `true`              |                                                                        |
+| `session`         | `none`              | `herdr` runs the agent in a joinable session — see [below](#joinable-sessions-herdr) |
+| `session-ssh-host`| —                   | host to SSH to when joining; adds a `herdr --remote` line to the join comment |
+| `session-ttl-hours`| `24`               | Ralph's sessions idle this long are stopped at the next run            |
 | `github-token`    | `github.token`      | pass a PAT to get CI on Ralph's PRs                                    |
 
 Outputs: `status` (`success` \| `blocked` \| `no-changes` \| `failed`),
@@ -173,6 +176,44 @@ project-local resources. An installed skill pack is a project-local resource.
 So `pi -p "/implement …"` without `--approve` runs your prompt with **zero
 skills loaded and still exits 0**: a plausible PR built from none of the
 workflow, with nothing in the log saying so. The adapter always passes `-a`.
+
+## Joinable sessions (herdr)
+
+With `session: herdr`, the agent runs **interactively**, as you, inside a named
+[herdr](https://herdr.dev) session on the runner, not headless. Ralph
+comments on the issue with the command to join:
+
+```
+herdr session attach ralph-<issue>-<run>
+```
+
+Anyone with a shell on the runner can join to watch, answer a question or keep
+steering. When the agent settles, the job carries on as usual: sweep, verify,
+push, PR. The session **stays up afterwards** so you can review in place. The
+next run for the same issue replaces it, and sessions idle longer than
+`session-ttl-hours` are stopped at the start of any run.
+
+What changes compared with headless mode:
+
+- **It runs as you.** The session starts without the workflow token, so the
+  agent's `gh` uses the runner user's own login. It keeps working after the
+  job ends, when the workflow token has expired. Claude runs with your own
+  settings and permission mode. For a fully unattended run, pass
+  `agent-args: --permission-mode bypassPermissions`.
+- **Questions reach a human.** If the agent stops at an approval or a
+  question, Ralph comments "waiting for input" with the join command and keeps
+  waiting until someone answers or `timeout-minutes` runs out.
+- **The brief is in a file.** The prompt is `<command> the work for issue #N`,
+  pointing at `.ralph/PROMPT.md`. That keeps the slash command at the start of
+  the input, where the harness resolves it.
+
+Requirements: `herdr` on the runner, and `agent: claude`. herdr also drives
+other agents, but only Claude has been run end to end so far. Joining from
+another machine needs SSH to the runner. Set `session-ssh-host` and the join
+comment gains `herdr --remote you@host --session …`.
+
+The design and the runs behind each workaround are in
+[ralph-alpha#12](https://github.com/dtun/ralph-alpha/issues/12).
 
 ## Running unattended skills that were written to be interactive
 
