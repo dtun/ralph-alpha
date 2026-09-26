@@ -62,7 +62,7 @@ export interface UnifiedStep {
   codeLanguage?: string;
   playerIds: string[]; // Which players are active for this step
   anchor?: string; // Matching stage on /action, for the deep link
-  session?: boolean; // Show the join comment in place of the code block
+  session?: boolean; // Show the join comment above the code block
 }
 
 export const unifiedSteps: UnifiedStep[] = [
@@ -90,21 +90,14 @@ export const unifiedSteps: UnifiedStep[] = [
   },
   {
     label: "AI Codes",
-    description: "Your coding agent iterates through the task",
+    description: "Your coding agent works the task, live and joinable",
     details:
-      "Ralph installs a pinned skill pack and hands the agent the brief. The pack owns the workflow: test, iterate, review. A real pack ships as the default — swap it, or the agent, without touching Ralph.",
+      "Ralph installs a pinned skill pack and hands the agent the brief. The pack owns the workflow: test, iterate, review. A real pack ships as the default — swap it, or the agent, without touching Ralph. With session: herdr the agent codes in a live session: Ralph posts the attach command on the issue, so you can watch or chime in while it works.",
     code: `skills-repo: mattpocock/skills   # the default
 agent: claude                    # or codex, opencode, pi`,
     codeLanguage: "yaml",
     playerIds: ["skills", "claude", "codex", "opencode", "pi"],
     anchor: "pack",
-  },
-  {
-    label: "Join Live",
-    description: "The session stays up. Paste one command to join.",
-    details:
-      "With session: herdr, the agent works interactively in a live session on the runner, as you. Ralph posts the attach command on the issue. Watch it work, type to it, and keep steering after the PR opens.",
-    playerIds: ["runners", "claude"],
     session: true,
   },
   {
@@ -221,7 +214,7 @@ export interface SessionCommentData {
 export const sessionCommentContent: SessionCommentData = {
   titlebar: "issue #42 · comment",
   author: "github-actions",
-  status: "session live on your-mac · claude",
+  status: "session live on your-mac",
   localLabel: "join the session: watch, or type to the agent",
   localCommand: "herdr session attach ralph-42",
 };
