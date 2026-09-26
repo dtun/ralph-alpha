@@ -250,7 +250,7 @@ export const fileMapContent = {
 
 export const statusContent = {
   heading: "Status",
-  body: "Skills resolve in print mode, which was the assumption the design rested on. On a real self-hosted Mac runner, checkout, the pinned pack install, brief extraction from a live issue, branch creation and the no-commits path have all run.",
+  body: "Skills resolve in print mode, which was the assumption the design rested on. On a real self-hosted Mac runner, labelling an issue ready-for-agent has run every stage in sequence — pack install, brief, implement, verify — and ended in a draft pull request.",
   unverified:
-    "Still unobserved: every stage in sequence ending in a pull request, whether the output is worth reviewing across a sample of runs, and more than one runner. The tag stays v0 until those are seen.",
+    "Still unobserved: CI on Ralph's pull requests, whether the output is worth reviewing across a sample of runs, and more than one runner. The tag stays v0 until the input names settle.",
 };

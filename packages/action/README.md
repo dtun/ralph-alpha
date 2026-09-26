@@ -385,10 +385,20 @@ rested on. A project-scoped skill placed in `.claude/skills/` and invoked as
 install, brief extraction from a live issue, branch creation and the
 no-commits path have all executed on macOS/arm64.
 
+**A labelled issue ends in a pull request.** Labelling an issue
+`ready-for-agent` in a test repository ran every stage in sequence through the
+production `issues: labeled` trigger — pack install, brief, `/implement`,
+`verify`, draft PR, issue comment — in under two minutes. The PR carried the
+assumptions report and the no-CI warning in its body, and no run artifacts in
+its diff. The session mode has also run the real action through to pull
+requests, from a separate workflow rather than the label trigger.
+
 Still unobserved:
 
-- **A complete run ending in a pull request.** Every stage has run; they have
-  not yet run in sequence all the way to one.
+- **A session run from the label trigger.** Session runs so far came from a
+  spike workflow, not `issues: labeled`.
+- **CI on Ralph's pull requests.** Every run so far used the default token, so
+  none of its PRs has been checked by CI.
 - **Whether the output is worth reviewing.** Whether the entry skill reliably
   produces mergeable work, and whether the assumptions report records decisions a
   reviewer actually wants, is a question about the skill pack and the preamble
