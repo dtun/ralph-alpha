@@ -3,6 +3,19 @@
 
 @source "../../packages/ui/src";
 
+/* Live-session green. accent-green is unreadable on the light background
+   (1.4:1), so light mode gets a darker green that meets WCAG AA for text
+   (5.1:1 on white, 4.8:1 on the subtle panel). Dark mode keeps the bright one. */
+@theme {
+  --color-live: #1a7f37;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-live: var(--color-accent-green);
+  }
+}
+
 /* IBM Plex Mono font */
 @font-face {
   font-family: "IBM Plex Mono";

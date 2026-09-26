@@ -69,7 +69,7 @@ export function ComponentCard({ icon, title, description, isActive = false, subP
 
       {/* This player hosts a session a person can join */}
       {live && (
-        <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-accent-green border border-accent-green/40 rounded px-1.5 py-0.5">
+        <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-live border border-live/40 rounded px-1.5 py-0.5">
           <LiveDot />
           {live}
         </span>
