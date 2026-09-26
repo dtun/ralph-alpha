@@ -21,7 +21,6 @@ import {
   comparisonContent,
   fileTreeContent,
   setupChecklistContent,
-  roadmapStatusLabels,
   sessionCommentContent,
 } from "./_data/explainer-content";
 
@@ -62,7 +61,6 @@ export default function Home() {
           steps={unifiedSteps}
           iconMap={iconMap}
           sessionComment={sessionCommentContent}
-          statusLabels={roadmapStatusLabels}
         />
 
         {/* File Structure */}

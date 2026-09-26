@@ -1,29 +1,4 @@
-import type {
-  RoadmapStatus,
-  SessionCommentData,
-} from "../_data/explainer-content";
-
-const statusStyles: Record<RoadmapStatus, string> = {
-  v0: "text-accent-green border-accent-green/40",
-  proven: "text-accent-yellow border-accent-yellow/40",
-  next: "text-light-text-muted dark:text-text-subtle border-dashed border-light-border dark:border-dark-border",
-};
-
-export function StatusBadge({
-  status,
-  labels,
-}: {
-  status: RoadmapStatus;
-  labels: Record<RoadmapStatus, string>;
-}) {
-  return (
-    <span
-      className={`font-mono text-[11px] uppercase tracking-wider rounded border px-1.5 py-0.5 whitespace-nowrap ${statusStyles[status]}`}
-    >
-      {labels[status]}
-    </span>
-  );
-}
+import type { SessionCommentData } from "../_data/explainer-content";
 
 // Pulsing dot for a live session. Still under reduced motion.
 export function LiveDot() {
@@ -75,16 +50,6 @@ export function SessionComment({ comment }: { comment: SessionCommentData }) {
             <p className="text-light-text dark:text-text-primary">
               <span className="text-accent-yellow select-none">$ </span>
               {comment.localCommand}
-            </p>
-          </div>
-
-          <div className="pl-4 opacity-60">
-            <p className="text-light-text-muted dark:text-text-subtle">
-              # {comment.remoteLabel}
-            </p>
-            <p className="text-light-text-muted dark:text-text-muted">
-              <span className="select-none">$ </span>
-              {comment.remoteCommand}
             </p>
           </div>
         </div>

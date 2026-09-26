@@ -4,11 +4,10 @@ import { useState, useEffect, ReactNode } from "react";
 import Link from "next/link";
 import { ComponentCard } from "./component-card";
 import { CodeBlock } from "./code-block";
-import { SessionComment, StatusBadge, LiveDot } from "./session-comment";
+import { SessionComment, LiveDot } from "./session-comment";
 import {
   UnifiedStep,
   PlayerData,
-  RoadmapStatus,
   SessionCommentData,
 } from "../_data/explainer-content";
 
@@ -17,7 +16,6 @@ interface PlayerWorkflowProps {
   steps: UnifiedStep[];
   iconMap: Record<string, ReactNode>;
   sessionComment: SessionCommentData;
-  statusLabels: Record<RoadmapStatus, string>;
 }
 
 function StepIndicator({
@@ -90,7 +88,6 @@ export function PlayerWorkflow({
   steps,
   iconMap,
   sessionComment,
-  statusLabels,
 }: PlayerWorkflowProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -218,16 +215,13 @@ export function PlayerWorkflow({
         </div>
 
         <div className="terminal-content">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
+          <div className="flex items-center gap-3 mb-4">
             <span className="font-mono text-sm text-accent-yellow">
               [{activeStep + 1}]
             </span>
             <h3 className="font-mono text-lg font-semibold text-light-text dark:text-text-primary">
               {step.label}
             </h3>
-            <span className="ml-auto">
-              <StatusBadge status={step.status} labels={statusLabels} />
-            </span>
           </div>
 
           <p className="text-base text-light-text dark:text-text-primary mb-3">

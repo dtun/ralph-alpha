@@ -62,7 +62,6 @@ export interface UnifiedStep {
   codeLanguage?: string;
   playerIds: string[]; // Which players are active for this step
   anchor?: string; // Matching stage on /action, for the deep link
-  status: RoadmapStatus;
   session?: boolean; // Show the join comment in place of the code block
 }
 
@@ -77,7 +76,6 @@ export const unifiedSteps: UnifiedStep[] = [
     codeLanguage: "bash",
     playerIds: ["actions"],
     anchor: "trigger",
-    status: "v0",
   },
   {
     label: "Runner Claims",
@@ -89,7 +87,6 @@ export const unifiedSteps: UnifiedStep[] = [
     codeLanguage: "yaml",
     playerIds: ["runners"],
     anchor: "claim",
-    status: "v0",
   },
   {
     label: "AI Codes",
@@ -101,7 +98,6 @@ agent: claude                    # or codex, opencode, pi`,
     codeLanguage: "yaml",
     playerIds: ["skills", "claude", "codex", "opencode", "pi"],
     anchor: "pack",
-    status: "v0",
   },
   {
     label: "Join Live",
@@ -109,7 +105,6 @@ agent: claude                    # or codex, opencode, pi`,
     details:
       "With session: herdr, the agent works interactively in a live session on the runner, as you. Ralph posts the attach command on the issue. Watch it work, type to it, and keep steering after the PR opens.",
     playerIds: ["runners", "claude"],
-    status: "proven",
     session: true,
   },
   {
@@ -123,7 +118,6 @@ agent: claude                    # or codex, opencode, pi`,
     codeLanguage: "bash",
     playerIds: ["actions"],
     anchor: "review",
-    status: "v0",
   },
 ];
 
@@ -215,25 +209,12 @@ export const setupChecklistContent = {
   ],
 };
 
-// Where this is heading: the run becomes a session you can join.
-// Keep each status honest. The evidence lives on dtun/ralph-alpha#12.
-// "proven" means a real end-to-end run on a branch that is not merged yet.
-export type RoadmapStatus = "v0" | "proven" | "next";
-
-export const roadmapStatusLabels: Record<RoadmapStatus, string> = {
-  v0: "v0 · runs today",
-  proven: "proven · not merged yet",
-  next: "next",
-};
-
 export interface SessionCommentData {
   titlebar: string;
   author: string;
   status: string;
   localLabel: string;
   localCommand: string;
-  remoteLabel: string;
-  remoteCommand: string;
 }
 
 // The comment Ralph posts on the issue once the session is up.
@@ -241,8 +222,6 @@ export const sessionCommentContent: SessionCommentData = {
   titlebar: "issue #42 · comment",
   author: "github-actions",
   status: "session live on your-mac · claude",
-  localLabel: "join on this machine",
+  localLabel: "join the session: watch, or type to the agent",
   localCommand: "herdr session attach ralph-42",
-  remoteLabel: "join from anywhere · next, not working yet",
-  remoteCommand: "herdr --remote you@your-mac --session ralph-42",
 };
