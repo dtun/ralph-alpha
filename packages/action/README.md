@@ -200,9 +200,19 @@ What changes compared with headless mode:
   job ends, when the workflow token has expired. Claude runs with your own
   settings and permission mode. For a fully unattended run, pass
   `agent-args: --permission-mode bypassPermissions`.
-- **Questions reach a human.** If the agent stops at an approval or a
-  question, Ralph comments "waiting for input" with the join command and keeps
-  waiting until someone answers or `timeout-minutes` runs out.
+- **A block becomes a question.** A session addendum to the AFK preamble
+  ([`session-preamble.md`](./scripts/session-preamble.md)) changes one rule:
+  instead of writing `BLOCKED.md` and stopping, the agent writes its question
+  to `.ralph/WAITING.md`, asks it in the session, and waits. Ralph posts the
+  question on the issue with the join command. Answer it in the session and the
+  agent records the decision and carries on. If nobody answers before
+  `timeout-minutes`, the question becomes a normal block and still gets a PR.
+  Raise the budget if you expect to be answering.
+- **Approvals reach a human too.** If the agent stops at a permission or
+  approval prompt, Ralph comments "waiting for input" and waits the same way.
+- **What you type is an amendment.** Messages typed into the session outrank
+  the brief, and the agent records any change of scope in
+  `.ralph/ASSUMPTIONS.md` so the reviewer sees it.
 - **The brief is in a file.** The prompt is `<command> the work for issue #N`,
   pointing at `.ralph/PROMPT.md`. That keeps the slash command at the start of
   the input, where the harness resolves it.
