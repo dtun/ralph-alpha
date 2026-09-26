@@ -7,7 +7,6 @@ import { SetupChecklist } from "./_components/setup-checklist";
 import { Footer } from "./_components/footer";
 import { ComingSoonSection } from "./_components/coming-soon-section";
 import { EarlyInvestorSection } from "./_components/early-investor-section";
-import { JoinableSessionSection } from "./_components/joinable-session-section";
 import {
   LaptopIcon,
   WorkflowIcon,
@@ -22,7 +21,6 @@ import {
   comparisonContent,
   fileTreeContent,
   setupChecklistContent,
-  joinableSessionContent,
   roadmapStatusLabels,
   sessionCommentContent,
 } from "./_data/explainer-content";
@@ -64,16 +62,6 @@ export default function Home() {
           steps={unifiedSteps}
           iconMap={iconMap}
           sessionComment={sessionCommentContent}
-          statusLabels={roadmapStatusLabels}
-        />
-
-        {/* Where this is heading - a live session you can join */}
-        <JoinableSessionSection
-          eyebrow={joinableSessionContent.eyebrow}
-          heading={joinableSessionContent.heading}
-          intro={joinableSessionContent.intro}
-          runsAsYou={joinableSessionContent.runsAsYou}
-          steps={joinableSessionContent.steps}
           statusLabels={roadmapStatusLabels}
         />
 
