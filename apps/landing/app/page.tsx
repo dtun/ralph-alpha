@@ -20,12 +20,13 @@ import {
   comparisonContent,
   fileTreeContent,
   setupChecklistContent,
+  sessionCommentContent,
 } from "./_data/explainer-content";
 
 const iconMap: Record<string, React.ReactNode> = {
   runners: <LaptopIcon />,
   actions: <WorkflowIcon />,
-  ralph: <TerminalIcon />,
+  skills: <TerminalIcon />,
   agents: <SparklesIcon />,
 };
 
@@ -58,6 +59,7 @@ export default function Home() {
           players={componentsContent}
           steps={unifiedSteps}
           iconMap={iconMap}
+          sessionComment={sessionCommentContent}
         />
 
         {/* File Structure */}

@@ -1,0 +1,426 @@
+# Ralph
+
+Register your machines as runners. Label an issue. Get a pull request.
+
+Ralph is an agent orchestrator with a deliberately small surface. It does not
+decide how software gets built — a **skill pack** does that. Ralph owns the
+trigger, the workspace, the clock, and the reporting back to your tracker.
+Everything else is pluggable.
+
+```
+issue labeled ready-for-agent
+        │
+        ▼
+  your runner claims it        ← GitHub Actions, your hardware
+        │
+        ▼
+  install pinned skill pack    ← mattpocock/skills@v1.1.0, or yours
+        │
+        ▼
+  agent runs /implement        ← claude | codex | opencode | pi
+        │
+        ▼
+  draft PR + a written    ← back on the issue thread
+  record of every call
+```
+
+## Why it triggers on `ready-for-agent`
+
+Ralph does not define its own label. It reuses the one your triage flow already
+produces.
+
+In [mattpocock/skills](https://github.com/mattpocock/skills), `/triage` moves
+issues through a state machine, and `ready-for-agent` means _fully specified,
+ready for an AFK agent_. Moving an issue there also posts an **Agent Brief** — a
+structured comment with current behaviour, desired behaviour, key interfaces,
+acceptance criteria, and explicit scope boundaries.
+
+That brief is exactly the contract an unattended agent needs, and a human wrote
+or approved it. Ralph reads the most recent one on the issue and treats it as
+the specification; the issue body is demoted to context. If no brief is present
+Ralph still runs, but says so loudly on the PR.
+
+The upshot: **the human gate is triage**, where it belongs. Ralph is the
+mechanism that fires once a human has said the work is ready.
+
+## Why the skill pack owns the loop
+
+`/implement` already drives TDD at agreed seams, runs typechecks throughout and
+the full suite at the end, then runs `/code-review` before committing. That is
+the iterate-until-green loop. Reimplementing it in bash would produce a worse
+version that drifts from the pack.
+
+So Ralph does not loop. It sets a wall-clock budget and gets out of the way.
+Iteration count, stop conditions, and what "done" means are the pack's business.
+
+## Setup
+
+**Once per machine** — register a self-hosted runner, then install the agent and
+tools it needs:
+
+```bash
+npm i -g @anthropic-ai/claude-code && claude auth login
+brew install gh jq coreutils   # coreutils gives macOS a timeout(1)
+gh auth login
+```
+
+### Running the runner as a service
+
+`./svc.sh install && ./svc.sh start` keeps the runner up across logouts and
+reboots, and gives jobs the PATH saved in the runner's `.path`. `run.sh` uses
+whatever PATH it was started with.
+
+On macOS the service needs one change before Ralph works under it. The
+generated LaunchAgent sets `SessionCreate`, which starts the runner in a fresh
+security session **without your login keychain**. That is where `claude` and
+`gh` keep their logins, so the agent reports "Not logged in" and `gh` loses
+its auth. Remove the key and restart:
+
+```bash
+plist=~/Library/LaunchAgents/actions.runner.<owner>-<repo>.<runner>.plist
+plutil -remove SessionCreate "$plist"
+./svc.sh stop && ./svc.sh start
+```
+
+Re-running `./svc.sh install` regenerates the plist, so repeat this after any
+reinstall. Ralph's preflight asks `claude auth status`, so a runner that
+cannot reach the login fails up front, before an agent runs and reports
+nothing.
+
+**Once per repo** — run the pack's setup skill locally, in a normal session:
+
+```
+/setup-matt-pocock-skills
+```
+
+That writes `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, and
+`docs/agents/domain.md`. Ralph reads the same config, so there is no separate
+`ralph.yml` to maintain. If your triage labels differ from the defaults, change
+the workflow's `if:` to match the right-hand column of `triage-labels.md`.
+
+Then copy [`examples/ralph.yml`](./examples/ralph.yml) into `.github/workflows/`.
+
+## CI on Ralph's pull requests
+
+Read this before you merge anything Ralph opens.
+
+GitHub will not trigger `pull_request` workflows for a pull request opened with
+the default `GITHUB_TOKEN`. The restriction exists to stop a workflow triggering
+itself forever, and it applies whatever your permissions say. So on the default
+token Ralph's PRs arrive with no checks at all — and a PR with no checks looks a
+lot like a PR whose checks passed, especially in a list. That inverts the whole
+safety story: the one change nobody wrote by hand becomes the only change
+arriving unverified.
+
+Ralph will not let that pass quietly. A run on the default token says so in the
+log, and again on the pull request body alongside its other warnings, where the
+reviewer is already looking. The fix is to open the PR as something other than
+the workflow itself, which means one of two tokens.
+
+**A GitHub App** is the better answer for anything shared. It is scoped to the
+repositories you install it on, revocable without touching a person's account,
+consumes no seat, and its token is minted per run and expires in an hour:
+
+```yaml
+- uses: actions/create-github-app-token@v1
+  id: app-token
+  with:
+    app-id: ${{ vars.RALPH_APP_ID }}
+    private-key: ${{ secrets.RALPH_APP_PRIVATE_KEY }}
+
+- uses: dtun/ralph-alpha/packages/action@v0
+  with:
+    github-token: ${{ steps.app-token.outputs.token }}
+```
+
+Grant it repository permissions **Contents: read & write**, **Pull requests:
+read & write**, and **Issues: read & write** — Ralph pushes a branch, opens the
+PR, and comments on the issue.
+
+**A fine-grained PAT** is the quicker answer, and fine for a repo you own alone.
+Same three permissions, stored as a repository secret:
+
+```yaml
+- uses: dtun/ralph-alpha/packages/action@v0
+  with:
+    github-token: ${{ secrets.RALPH_PAT }}
+```
+
+The tradeoff is that every branch, PR and comment Ralph produces is attributed
+to you personally, and the run breaks on whatever day the token expires.
+
+## Versioning
+
+```yaml
+- uses: dtun/ralph-alpha/packages/action@v0
+```
+
+**`v0` means no stability promise.** Inputs may be renamed and behaviour may
+change between releases while the design is still being proven on real runs.
+The tag moves as fixes land, so you get them without editing your workflow —
+and you inherit breaking changes the same way. Pin a commit SHA instead if you
+need a workflow that cannot shift under you.
+
+`v1` will mean the inputs have settled. It does not exist yet, and the
+[open questions](#what-has-actually-been-observed) below are why.
+
+## Inputs
+
+| Input             | Default             | Notes                                                                  |
+| ----------------- | ------------------- | ---------------------------------------------------------------------- |
+| `issue-number`    | triggering issue    |                                                                        |
+| `agent`           | `claude`            | `claude`, `codex`, `opencode`, `pi` — see [adapters](./scripts/agents) |
+| `agent-args`      | —                   | flags passed straight to the agent CLI, split on whitespace            |
+| `skills-repo`     | `mattpocock/skills` | any Agent Skills pack                                                  |
+| `skills-ref`      | `v1.1.0`            | always pin                                                             |
+| `skills`          | all                 | space-separated allowlist — must be transitively closed                |
+| `setup`           | —                   | runs before the agent — see [below](#why-there-is-a-setup-input)       |
+| `command`         | `/implement`        | entry skill                                                            |
+| `base`            | default branch      |                                                                        |
+| `verify`          | —                   | outer guard; failure forces draft                                      |
+| `timeout-minutes` | `45`                | wall-clock budget                                                      |
+| `draft`           | `true`              |                                                                        |
+| `session`         | `none`              | `herdr` runs the agent in a joinable session — see [below](#joinable-sessions-herdr) |
+| `session-ssh-host`| —                   | host to SSH to when joining; adds a `herdr --remote` line to the join comment |
+| `session-ttl-hours`| `24`               | Ralph's sessions idle this long are stopped at the next run            |
+| `session-wait-minutes`| `60`            | how long a question waits for an answer; the agent's clock is paused meanwhile |
+| `github-token`    | `github.token`      | App or PAT — [without one, no CI runs](#ci-on-ralphs-pull-requests)    |
+
+Outputs: `status` (`success` \| `blocked` \| `no-changes` \| `failed`),
+`pr-url`, `branch`.
+
+Skills invoke each other, so an allowlist has to include the whole chain —
+`/implement` drives `/tdd` and `/code-review`, which reach for
+`/codebase-design` and `/domain-modeling`. Leaving the default empty installs
+all 28 non-deprecated skills and avoids the problem; narrow it only once you
+know what your entry skill actually reaches for.
+
+## Why there is a `setup` input
+
+Ralph does its own `actions/checkout` as its first step. That is convenient
+until you need `npm ci`, at which point it is a trap: any step you write before
+the action runs before the repo exists, and there is no step _inside_ it for
+you to write. So the agent arrives in a bare checkout with no dependencies, and
+`verify` grades that same tree afterwards.
+
+```yaml
+with:
+  setup: npm ci
+  verify: npm test
+```
+
+`setup` is the seam that ownership took away. It runs in the repository root
+after the pack is installed and before the agent, and both the agent and
+`verify` inherit whatever it leaves behind. It is a plain shell command, so
+`bundle install && bin/rails db:test:prepare` is as valid as `npm ci`.
+
+Failing loudly and early is most of the value. A missing lockfile stops the run
+there and then, in a step named for it, with npm's output attached — instead of
+surfacing forty minutes later as an agent that quietly could not run the tests
+and a draft PR nobody can explain.
+
+One thing to watch: whatever `setup` writes is in the working tree when the
+agent finishes, and Ralph sweeps untracked files into a commit so partial work
+is never lost. Build output your `.gitignore` does not already cover will land
+in the pull request.
+
+## Your own skills, on top
+
+You do not have to choose between the pack and skills of your own. Three
+sources reach the agent, and only the middle one is pinned:
+
+1. **Your repo** — anything committed under `.claude/skills/` or
+   `.agents/skills/`. **These win.** On a name collision the pack is skipped
+   and yours is left alone, because a committed skill is a deliberate override.
+2. **The pack** — cloned at `skills-ref` and copied in _around_ what your repo
+   already defines. It fills gaps rather than replacing the set.
+3. **The runner** — agents also read skills under `$HOME`, so whatever the
+   person who set that machine up has installed is in scope. Ralph cannot pin
+   this layer. It is the first place to look when two runners disagree.
+
+Every run logs the split:
+
+```
+==> pack: 26 installed from mattpocock/skills@v1.1.0 (pinned)
+==> repo: 1 kept over the pack (tdd), 1 repo-only
+==> home: skills under $HOME on this runner are visible too ...
+```
+
+Local-wins is not only ergonomics. `.git/info/exclude` cannot suppress a
+_tracked_ file, so overwriting a skill you had committed would show as a
+modification and get swept into the agent's commit — silently shipping the
+pack's version of your skill inside an unrelated pull request.
+
+## Agents
+
+Adapters live in [`scripts/agents/`](./scripts/agents). Each is one file
+implementing a three-part contract, so adding an agent never touches
+`ralph.sh`.
+
+[**pi**](https://pi.dev) is the one worth calling out, for two reasons.
+
+It already reads `.agents/skills/` — the same path Codex and other Agent
+Skills harnesses use, and the one this action installs packs into. A pack drops
+in with no special-casing, which is the clearest evidence so far that the
+pack-level seam is genuinely portable rather than just claimed.
+
+It is also multi-provider, so with pi "BYO agent" extends to "BYO model":
+
+```yaml
+with:
+  agent: pi
+  agent-args: --provider anthropic --model claude-opus-4-5
+```
+
+One trap, handled in the adapter but worth knowing about if you run pi by hand.
+In non-interactive modes pi does not prompt for trust — it falls back to
+`defaultProjectTrust`, which defaults to `ask`, and `ask` _ignores_
+project-local resources. An installed skill pack is a project-local resource.
+So `pi -p "/implement …"` without `--approve` runs your prompt with **zero
+skills loaded and still exits 0**: a plausible PR built from none of the
+workflow, with nothing in the log saying so. The adapter always passes `-a`.
+
+## Joinable sessions (herdr)
+
+With `session: herdr`, the agent runs **interactively**, as you, inside a named
+[herdr](https://herdr.dev) session on the runner, not headless. Ralph
+comments on the issue with the command to join:
+
+```
+herdr session attach ralph-<issue>-<run>
+```
+
+Anyone with a shell on the runner can join to watch, answer a question or keep
+steering. When the agent settles, the job carries on as usual: sweep, verify,
+push, PR. The session **stays up afterwards** so you can review in place. The
+next run for the same issue replaces it, and sessions idle longer than
+`session-ttl-hours` are stopped at the start of any run.
+
+What changes compared with headless mode:
+
+- **It runs as you.** The session starts without the workflow token, so the
+  agent's `gh` uses the runner user's own login. It keeps working after the
+  job ends, when the workflow token has expired. Claude runs with your own
+  settings and permission mode. For a fully unattended run, pass
+  `agent-args: --permission-mode bypassPermissions`.
+- **A block becomes a question.** A session addendum to the AFK preamble
+  ([`session-preamble.md`](./scripts/session-preamble.md)) changes one rule:
+  instead of writing `BLOCKED.md` and stopping, the agent writes its question
+  to `.ralph/WAITING.md`, asks it in the session, and waits. Ralph posts the
+  question on the issue with the join command. Answer it in the session and the
+  agent records the decision and carries on. The agent's `timeout-minutes`
+  clock is paused while it waits; the wait has its own cap,
+  `session-wait-minutes`. If nobody answers in time, the question becomes a
+  normal block and still gets a PR. The job's own `timeout-minutes` still
+  caps everything, so leave room for both.
+- **Approvals reach a human too.** If the agent stops at a permission or
+  approval prompt, Ralph comments "waiting for input" and waits the same way.
+- **What you type is an amendment.** Messages typed into the session outrank
+  the brief, and the agent records any change of scope in
+  `.ralph/ASSUMPTIONS.md` so the reviewer sees it.
+- **The brief is in a file.** The prompt is `<command> the work for issue #N`,
+  pointing at `.ralph/PROMPT.md`. That keeps the slash command at the start of
+  the input, where the harness resolves it.
+
+Requirements: `herdr` on the runner, and `agent: claude`. herdr also drives
+other agents, but only Claude has been run end to end so far. Joining from
+another machine needs SSH to the runner. Set `session-ssh-host` and the join
+comment gains `herdr --remote you@host --session …`.
+
+The design and the runs behind each workaround are in
+[ralph-alpha#12](https://github.com/dtun/ralph-alpha/issues/12).
+
+## Running unattended skills that were written to be interactive
+
+This is the interesting problem, and it is what
+[`scripts/afk-preamble.md`](./scripts/afk-preamble.md) exists to solve.
+
+The pack's skills assume a human is present. `/tdd` says _"No test is written at
+an unconfirmed seam"_ — it wants you to agree the seams first. `/code-review`
+asks for a fixed point if you did not give it one. On a runner there is nobody
+to ask, so a naive run either stalls or silently invents an answer.
+
+The preamble converts each interactive gate into a recorded decision:
+
+- **Seam agreement** → derive seams from the brief's acceptance criteria, and
+  write the chosen seams into `.ralph/ASSUMPTIONS.md` before the first test.
+- **Review fixed point** → the base ref, no question asked.
+- **Spec location** → the Agent Brief, reproduced in `.ralph/ASSUMPTIONS.md`.
+- **Anything else** → make the call, record it with one line of reasoning.
+
+That report lands in the PR body, so the review starts with _"here is
+every judgment call I made without you"_. That artifact is the point. An
+unrecorded assumption is indistinguishable from a bug to whoever reviews this.
+
+Both files live under `.ralph/`, which Ralph excludes from git for the run.
+They are written _for the reviewer_, and Ralph lifts them into the PR
+description — so committing them as well would show the same text twice and
+leave a file to delete before every merge. The report belongs in the review,
+not in the repository.
+
+The preamble also draws a line: ambiguity gets an assumption, but a genuine
+block — a product decision, a missing credential — gets `.ralph/BLOCKED.md` and
+a stop.
+Ralph turns that into a draft PR with the question on it, so a blocked run is a
+useful outcome rather than a wasted one.
+
+## Failure modes it handles
+
+- **Agent produces nothing** — no PR, a comment on the issue saying so. It never
+  pushes an empty branch and reports green.
+- **Agent leaves work uncommitted** — swept into a commit so partial work
+  survives.
+- **Budget exhausted** — the work so far ships as a draft, flagged on the PR.
+- **`verify` fails** — draft PR with the tail of the output in the body.
+- **No agent brief** — runs conservatively, flags it prominently.
+
+## What has actually been observed
+
+**Skills resolve in print mode.** This is the assumption the whole design
+rested on. A project-scoped skill placed in `.claude/skills/` and invoked as
+`/name` through `claude --print` on stdin runs — confirmed against Claude Code
+2.1.220 with a canary skill whose only job was to prove it.
+
+**The pipeline runs on a real self-hosted runner.** Checkout, pinned pack
+install, brief extraction from a live issue, branch creation and the
+no-commits path have all executed on macOS/arm64.
+
+**A labelled issue ends in a pull request.** Labelling an issue
+`ready-for-agent` in a test repository ran every stage in sequence through the
+production `issues: labeled` trigger — pack install, brief, `/implement`,
+`verify`, draft PR, issue comment — in under two minutes. The PR carried the
+assumptions report and the no-CI warning in its body, and no run artifacts in
+its diff. The session mode has also run the real action through to pull
+requests, from a separate workflow rather than the label trigger.
+
+Still unobserved:
+
+- **A session run from the label trigger.** Session runs so far came from a
+  spike workflow, not `issues: labeled`.
+- **CI on Ralph's pull requests.** Every run so far used the default token, so
+  none of its PRs has been checked by CI.
+- **Whether the output is worth reviewing.** Whether the entry skill reliably
+  produces mergeable work, and whether the assumptions report records decisions a
+  reviewer actually wants, is a question about the skill pack and the preamble
+  rather than the orchestrator. It needs a sample, not a single run.
+- **More than one runner.** The multiplayer claim has never been tested with
+  two machines.
+
+The tag stays `v0` until the input names have settled.
+
+## Known gaps
+
+- **Isolation.** The agent runs with write access to the workspace and inherits
+  the runner's `gh` and agent credentials. On a shared laptop that is a real
+  blast radius.
+  [**A least-privilege runner**](./docs/least-privilege-runner.md) is the
+  runbook for cutting that down to one repository — and is equally clear about
+  what a dedicated account still leaves exposed. Containers are the stronger
+  answer, and awkward on macOS for reasons the same page covers.
+- **CI on Ralph's PRs.** GitHub does not trigger `pull_request` workflows for
+  PRs opened with `GITHUB_TOKEN`, so the default configuration ships PRs no CI
+  has seen. A run says so on its own PR, but saying so is not fixing it —
+  [pass an App or PAT token](#ci-on-ralphs-pull-requests).
+- **Marketplace.** Listing requires `action.yml` at a repo root, so this needs
+  to move to its own repo before it can be listed. `owner/repo/path@ref` works
+  fine in the meantime.

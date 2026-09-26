@@ -1,0 +1,184 @@
+name: "Ralph"
+description: "Pick up a triaged issue on your own runners and drive a skill pack to a pull request. BYO agent, BYO skills."
+author: "Ralph Alpha"
+
+branding:
+  icon: "zap"
+  color: "yellow"
+
+inputs:
+  issue-number:
+    description: "Issue to work. Defaults to the issue from the triggering event."
+    required: false
+    default: ${{ github.event.issue.number }}
+
+  agent:
+    description: "Coding agent adapter to run: claude | codex | opencode | pi. Must be installed and authenticated on the runner."
+    required: false
+    default: "claude"
+
+  agent-args:
+    description: >-
+      Extra flags passed straight to the agent CLI, e.g. "--model
+      anthropic/claude-opus-4-5" for pi. Split on whitespace, so no quoted
+      arguments containing spaces.
+    required: false
+    default: ""
+
+  skills-repo:
+    description: "Skill pack to install, as owner/repo. Swap this to run your own pack."
+    required: false
+    default: "mattpocock/skills"
+
+  skills-ref:
+    description: "Ref of the skill pack to pin. Always pin — an unpinned pack changes your agent's behaviour without a diff."
+    required: false
+    default: "v1.1.0"
+
+  skills:
+    description: "Space-separated skill names to install from the pack. Empty installs every non-deprecated skill."
+    required: false
+    default: ""
+
+  setup:
+    description: >-
+      Command run in the repository root after checkout and skill install,
+      before the agent. This action owns the checkout, so a step of your own
+      would run before the repo exists — this is the only place dependencies
+      can be installed. The agent and `verify` both inherit what it produces.
+      Non-zero fails the run before the agent starts.
+    required: false
+    default: ""
+
+  command:
+    description: "Skill invocation that does the work. The agent brief is appended as context."
+    required: false
+    default: "/implement"
+
+  base:
+    description: "Branch to cut from and target with the PR."
+    required: false
+    default: ${{ github.event.repository.default_branch }}
+
+  verify:
+    description: "Optional command run after the agent finishes. Non-zero forces the PR to draft. The skill pack should already be testing; this is the outer guard."
+    required: false
+    default: ""
+
+  timeout-minutes:
+    description: "Wall-clock budget for the agent. The skill pack owns its own iteration count; Ralph only owns the clock."
+    required: false
+    default: "45"
+
+  draft:
+    description: "Open the PR as a draft."
+    required: false
+    default: "true"
+
+  session:
+    description: >-
+      none runs the agent headless. herdr runs it interactively in a named herdr
+      session on the runner that people can join to watch or chime in, and
+      leaves the session up after the run. Requires herdr on the runner;
+      agent: claude only for now.
+    required: false
+    default: "none"
+
+  session-ssh-host:
+    description: >-
+      Host people should SSH to when joining a herdr session, e.g. a Tailscale
+      name. When set, the join comment includes a herdr --remote command.
+    required: false
+    default: ""
+
+  session-ttl-hours:
+    description: "Stop Ralph's herdr sessions that have been idle this long. Checked at the start of each run."
+    required: false
+    default: "24"
+
+  session-wait-minutes:
+    description: >-
+      How long a herdr session waits for someone to answer the agent's
+      question. The agent's timeout-minutes clock is paused while it waits.
+      An unanswered question becomes a block.
+    required: false
+    default: "60"
+
+  github-token:
+    description: >-
+      Token for issue and PR operations. Falls back to the workflow's own
+      GITHUB_TOKEN. Note: PRs opened with the default GITHUB_TOKEN do not
+      trigger pull_request workflows, so your CI will not run on Ralph's PRs.
+      Pass a PAT or GitHub App token to get CI.
+    required: false
+    # Left empty rather than defaulting to ${{ github.token }} so that "the
+    # caller passed a token" stays distinguishable from "nobody did". This is
+    # the last point where those two cases look different: once the default is
+    # applied, every consumer downstream sees an indistinguishable token
+    # string, and the only way to tell them apart again would be to compare
+    # secret values. Each use site falls back below.
+    default: ""
+
+outputs:
+  status:
+    description: "success | blocked | no-changes | failed"
+    value: ${{ steps.ralph.outputs.status }}
+  pr-url:
+    description: "URL of the pull request, if one was opened."
+    value: ${{ steps.ralph.outputs.pr_url }}
+  branch:
+    description: "Branch the agent committed to."
+    value: ${{ steps.ralph.outputs.branch }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check out base
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.base }}
+        fetch-depth: 0
+        token: ${{ inputs.github-token || github.token }}
+
+    - name: Install skill pack
+      shell: bash
+      env:
+        SKILLS_REPO: ${{ inputs.skills-repo }}
+        SKILLS_REF: ${{ inputs.skills-ref }}
+        SKILLS: ${{ inputs.skills }}
+        AGENT: ${{ inputs.agent }}
+        GH_TOKEN: ${{ inputs.github-token || github.token }}
+      run: ${{ github.action_path }}/scripts/install-skills.sh
+
+    # Its own step rather than a line in ralph.sh, so a broken install fails
+    # here — named, with its own log — instead of a third of the way through
+    # Ralph's output, after the issue has already been told a run is underway.
+    # Skipped entirely when unset, so nothing runs and nothing is logged.
+    - name: Set up workspace
+      if: inputs.setup != ''
+      shell: bash
+      run: ${{ inputs.setup }}
+
+    - name: Run Ralph
+      id: ralph
+      shell: bash
+      env:
+        ISSUE_NUMBER: ${{ inputs.issue-number }}
+        AGENT: ${{ inputs.agent }}
+        AGENT_ARGS: ${{ inputs.agent-args }}
+        COMMAND: ${{ inputs.command }}
+        BASE_REF: ${{ inputs.base }}
+        VERIFY_CMD: ${{ inputs.verify }}
+        TIMEOUT_MINUTES: ${{ inputs.timeout-minutes }}
+        DRAFT: ${{ inputs.draft }}
+        RUN_NUMBER: ${{ github.run_number }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        RUNNER_LABEL: ${{ runner.name }}
+        ACTION_PATH: ${{ github.action_path }}
+        SESSION_MODE: ${{ inputs.session }}
+        SESSION_SSH_HOST: ${{ inputs.session-ssh-host }}
+        SESSION_TTL_HOURS: ${{ inputs.session-ttl-hours }}
+        SESSION_WAIT_MINUTES: ${{ inputs.session-wait-minutes }}
+        GH_TOKEN: ${{ inputs.github-token || github.token }}
+        TOKEN_SUPPLIED: ${{ inputs.github-token != '' }}
+      run: ${{ github.action_path }}/scripts/ralph.sh

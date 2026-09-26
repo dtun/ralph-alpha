@@ -1,25 +1,34 @@
 "use client";
 
 import { useState, useEffect, ReactNode } from "react";
+import Link from "next/link";
 import { ComponentCard } from "./component-card";
 import { CodeBlock } from "./code-block";
-import { UnifiedStep, PlayerData } from "../_data/explainer-content";
+import { SessionComment, LiveDot } from "./session-comment";
+import {
+  UnifiedStep,
+  PlayerData,
+  SessionCommentData,
+} from "../_data/explainer-content";
 
 interface PlayerWorkflowProps {
   players: PlayerData[];
   steps: UnifiedStep[];
   iconMap: Record<string, ReactNode>;
+  sessionComment: SessionCommentData;
 }
 
 function StepIndicator({
   stepNumber,
   label,
   isActive,
+  live = false,
   onClick,
 }: {
   stepNumber: number;
   label: string;
   isActive: boolean;
+  live?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -32,7 +41,7 @@ function StepIndicator({
     >
       <div
         className={`
-          w-10 h-10 rounded-md flex items-center justify-center
+          relative w-10 h-10 rounded-md flex items-center justify-center
           font-mono font-semibold text-sm transition-all duration-150 border
           ${
             isActive
@@ -42,6 +51,11 @@ function StepIndicator({
         `}
       >
         {stepNumber}
+        {live && (
+          <span className="absolute -top-1 -right-1 flex">
+            <LiveDot />
+          </span>
+        )}
       </div>
       <span
         className={`
@@ -73,10 +87,13 @@ export function PlayerWorkflow({
   players,
   steps,
   iconMap,
+  sessionComment,
 }: PlayerWorkflowProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [randomSubPlayerId, setRandomSubPlayerId] = useState<string | null>(null);
+  const [randomSubPlayerId, setRandomSubPlayerId] = useState<string | null>(
+    null,
+  );
 
   const step = steps[activeStep];
   const basePlayerIds = step.playerIds;
@@ -87,7 +104,7 @@ export function PlayerWorkflow({
 
   // Find which sub-players are referenced in the current step
   const activeSubPlayerIds = basePlayerIds.filter((id) =>
-    allSubPlayerIds.includes(id)
+    allSubPlayerIds.includes(id),
   );
 
   // Build the effective activePlayerIds (non-sub-players + randomly selected sub-player)
@@ -115,7 +132,7 @@ export function PlayerWorkflow({
   useEffect(() => {
     // Respect prefers-reduced-motion
     const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+      "(prefers-reduced-motion: reduce)",
     ).matches;
     if (prefersReducedMotion || !isPlaying) return;
 
@@ -161,6 +178,7 @@ export function PlayerWorkflow({
               description={player.description}
               isActive={isActive}
               subPlayers={subPlayersWithState}
+              live={player.live}
             />
           );
         })}
@@ -174,6 +192,7 @@ export function PlayerWorkflow({
             stepNumber={index + 1}
             label={s.label}
             isActive={index === activeStep}
+            live={s.session}
             onClick={() => handleStepClick(index)}
           />
         ))}
@@ -212,9 +231,30 @@ export function PlayerWorkflow({
             {step.details}
           </p>
 
+          {step.session && (
+            <div className="mb-6">
+              <SessionComment comment={sessionComment} />
+            </div>
+          )}
+
           {step.code && (
             <div className="mb-6">
               <CodeBlock code={step.code} language={step.codeLanguage} bare />
+            </div>
+          )}
+
+          {step.anchor && (
+            <div className="mb-4 text-right">
+              <Link
+                href={`/action#${step.anchor}`}
+                // Stop the carousel on intent to click, so the link cannot
+                // advance to a different step under the cursor.
+                onMouseEnter={() => setIsPlaying(false)}
+                onFocus={() => setIsPlaying(false)}
+                className="font-mono text-xs text-light-text-muted dark:text-text-muted hover:text-accent-yellow hover:underline transition-colors duration-150"
+              >
+                How this step works {"-->"}
+              </Link>
             </div>
           )}
 

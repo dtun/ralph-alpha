@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { LiveDot } from "./session-comment";
 
 interface SubPlayerDisplay {
   id: string;
@@ -12,9 +13,10 @@ interface ComponentCardProps {
   description: string;
   isActive?: boolean;
   subPlayers?: SubPlayerDisplay[];
+  live?: string;
 }
 
-export function ComponentCard({ icon, title, description, isActive = false, subPlayers }: ComponentCardProps) {
+export function ComponentCard({ icon, title, description, isActive = false, subPlayers, live }: ComponentCardProps) {
   return (
     <div
       className={`
@@ -63,6 +65,14 @@ export function ComponentCard({ icon, title, description, isActive = false, subP
         <p className="text-xs text-light-text-muted dark:text-text-muted leading-relaxed">
           {description}
         </p>
+      )}
+
+      {/* This player hosts a session a person can join */}
+      {live && (
+        <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-accent-green border border-accent-green/40 rounded px-1.5 py-0.5">
+          <LiveDot />
+          {live}
+        </span>
       )}
     </div>
   );
