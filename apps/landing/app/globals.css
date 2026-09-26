@@ -3,16 +3,17 @@
 
 @source "../../packages/ui/src";
 
-/* Live-session green. accent-green is unreadable on the light background
-   (1.4:1), so light mode gets a darker green that meets WCAG AA for text
-   (5.1:1 on white, 4.8:1 on the subtle panel). Dark mode keeps the bright one. */
+/* The shared accent-green (#50fa7b) is 1.4:1 on the light background, so
+   the landing overrides it for light mode with a green that meets WCAG AA
+   for text (5.1:1 on white, 4.8:1 on the subtle panel). Dark mode keeps the
+   bright shared value (13.5:1 on dark-bg). */
 @theme {
-  --color-live: #1a7f37;
+  --color-accent-green: #1a7f37;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-live: var(--color-accent-green);
+    --color-accent-green: #50fa7b;
   }
 }
 

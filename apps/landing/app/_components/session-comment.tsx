@@ -4,8 +4,8 @@ import type { SessionCommentData } from "../_data/explainer-content";
 export function LiveDot() {
   return (
     <span className="relative inline-flex w-2 h-2" aria-hidden="true">
-      <span className="absolute inline-flex w-full h-full rounded-full bg-live opacity-60 animate-ping motion-reduce:animate-none" />
-      <span className="relative inline-flex w-2 h-2 rounded-full bg-live" />
+      <span className="absolute inline-flex w-full h-full rounded-full bg-accent-green opacity-60 animate-ping motion-reduce:animate-none" />
+      <span className="relative inline-flex w-2 h-2 rounded-full bg-accent-green" />
     </span>
   );
 }
