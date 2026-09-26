@@ -78,7 +78,7 @@ export const unifiedSteps: UnifiedStep[] = [
     label: "Runner Claims",
     description: "Next available machine picks up the job",
     details:
-      "Whichever team member's self-hosted runner is idle picks up the work. Could be anyone's laptop.",
+      "Whichever team member's self-hosted runner is idle picks up the work. Could be anyone's laptop, and the agent runs as that person: their agent login, their skills, their harness.",
     code: `runs-on: self-hosted
 # Any registered runner can claim this`,
     codeLanguage: "yaml",
