@@ -51,6 +51,7 @@ export default function ActionPage() {
           intro={afkContent.intro}
           outro={afkContent.outro}
           gates={afkContent.gates}
+          note={afkContent.note}
         />
 
         {/* Defaults, and the two axes that swap */}

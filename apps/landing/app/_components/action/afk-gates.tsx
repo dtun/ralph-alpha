@@ -5,9 +5,16 @@ interface AfkGatesProps {
   intro: string;
   outro: string;
   gates: Gate[];
+  note?: string;
 }
 
-export function AfkGates({ heading, intro, outro, gates }: AfkGatesProps) {
+export function AfkGates({
+  heading,
+  intro,
+  outro,
+  gates,
+  note,
+}: AfkGatesProps) {
   return (
     <section className="space-y-5">
       <h2 className="font-mono text-xl md:text-2xl font-bold text-accent-yellow">
@@ -55,6 +62,12 @@ export function AfkGates({ heading, intro, outro, gates }: AfkGatesProps) {
       <p className="text-sm md:text-base text-light-text-muted dark:text-text-muted leading-relaxed">
         {outro}
       </p>
+
+      {note && (
+        <p className="text-sm md:text-base text-light-text-muted dark:text-text-muted leading-relaxed border-l-2 border-accent-cyan pl-4">
+          {note}
+        </p>
+      )}
     </section>
   );
 }
