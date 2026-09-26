@@ -287,6 +287,4 @@ export const joinableSessionContent = {
     remoteLabel: "join from anywhere · next, not working yet",
     remoteCommand: "herdr --remote you@your-mac --session ralph-42",
   },
-  whyHerdr:
-    "Why herdr and not zellij: on a runner nobody is attached, and herdr can still read the agent's screen and tell when it has finished. zellij can't do that headless.",
 };

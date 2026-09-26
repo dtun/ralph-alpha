@@ -23,7 +23,6 @@ interface JoinableSessionSectionProps {
   steps: SessionStep[];
   comment: SessionComment;
   statusLabels: Record<RoadmapStatus, string>;
-  whyHerdr: string;
 }
 
 const statusStyles: Record<RoadmapStatus, string> = {
@@ -138,7 +137,6 @@ export function JoinableSessionSection({
   steps,
   comment,
   statusLabels,
-  whyHerdr,
 }: JoinableSessionSectionProps) {
   return (
     <section className="space-y-10">
@@ -208,10 +206,6 @@ export function JoinableSessionSection({
           </li>
         ))}
       </ol>
-
-      <p className="text-sm text-light-text-muted dark:text-text-muted leading-relaxed border-l-2 border-accent-yellow pl-4">
-        {whyHerdr}
-      </p>
     </section>
   );
 }

@@ -73,7 +73,6 @@ export default function Home() {
           steps={joinableSessionContent.steps}
           comment={joinableSessionContent.comment}
           statusLabels={roadmapStatusLabels}
-          whyHerdr={joinableSessionContent.whyHerdr}
         />
 
         {/* File Structure */}
