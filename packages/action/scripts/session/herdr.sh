@@ -18,6 +18,7 @@
 SESSION_NAME="ralph-${ISSUE_NUMBER}-${RUN_NUMBER}"
 SESSION_AGENT="issue-${ISSUE_NUMBER}"
 SESSION_TTL_HOURS="${SESSION_TTL_HOURS:-24}"
+SESSION_WAIT_MINUTES="${SESSION_WAIT_MINUTES:-60}"
 SESSION_SSH_HOST="${SESSION_SSH_HOST:-}"
 SESSION_NOTE=""
 
@@ -147,7 +148,7 @@ _ms_left() {
 }
 
 session_run() {
-  local prompt_file="$1" text out state attempt asked=false posted_question=""
+  local prompt_file="$1" text out state attempt asked=false posted_question="" wait_start
 
   _session_reap
   say "Starting herdr session ${SESSION_NAME}"
@@ -214,12 +215,21 @@ $(head -60 "$RALPH_DIR/WAITING.md")
 EOF
 )" > /dev/null
         fi
-        # An answer shows up as the agent going back to work; then let it
-        # settle again and look at what it left.
-        out="$(_hs agent wait "$SESSION_AGENT" --until working --timeout "$(_ms_left)" 2>&1)" || true
-        if ! echo "$out" | grep -q '"error"'; then
-          out="$(_hs agent wait "$SESSION_AGENT" --timeout "$(_ms_left)" 2>&1)" || true
+        # An answer shows up as the agent going back to work. Waiting for a
+        # human is not the agent working, so the agent's clock stops here:
+        # the wait has its own cap, and whatever it used is added back to
+        # the budget once someone answers.
+        wait_start=$(date +%s)
+        out="$(_hs agent wait "$SESSION_AGENT" --until working \
+                 --timeout $((SESSION_WAIT_MINUTES * 60000)) 2>&1)" || true
+        if echo "$out" | grep -q '"error"'; then
+          say "Nobody answered within ${SESSION_WAIT_MINUTES}m."
+          state=unanswered
+          break
         fi
+        DEADLINE=$(( DEADLINE + $(date +%s) - wait_start ))
+        say "Got an answer; the agent is working again."
+        out="$(_hs agent wait "$SESSION_AGENT" --timeout "$(_ms_left)" 2>&1)" || true
         ;;
       blocked)
         # The agent is waiting on a question or an approval. That is what
@@ -255,8 +265,10 @@ EOF
   # shellcheck disable=SC2034  # read by ralph.sh after session_run
   SESSION_NOTE="🖥️ The session is still up for review. $(_session_attach_help | head -1)"
 
+  # An unanswered question is a block (handled above), not a failure: the
+  # agent stopped where it was told to.
   case "$state" in
-    idle|done) return 0 ;;
+    idle|done|unanswered) return 0 ;;
     timeout)   return 124 ;;
     *)         return 1 ;;
   esac

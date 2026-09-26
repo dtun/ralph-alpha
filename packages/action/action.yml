@@ -86,6 +86,14 @@ inputs:
     required: false
     default: "24"
 
+  session-wait-minutes:
+    description: >-
+      How long a herdr session waits for someone to answer the agent's
+      question. The agent's timeout-minutes clock is paused while it waits.
+      An unanswered question becomes a block.
+    required: false
+    default: "60"
+
   github-token:
     description: >-
       Token for issue and PR operations. Note: PRs opened with the default
@@ -144,5 +152,6 @@ runs:
         SESSION_MODE: ${{ inputs.session }}
         SESSION_SSH_HOST: ${{ inputs.session-ssh-host }}
         SESSION_TTL_HOURS: ${{ inputs.session-ttl-hours }}
+        SESSION_WAIT_MINUTES: ${{ inputs.session-wait-minutes }}
         GH_TOKEN: ${{ inputs.github-token }}
       run: ${{ github.action_path }}/scripts/ralph.sh
