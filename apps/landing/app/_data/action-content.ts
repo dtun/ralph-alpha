@@ -102,6 +102,7 @@ export const afkContent = {
     "This is the interesting problem. The pack's skills assume a human is in the room — one of them refuses to write a test at a seam you have not confirmed. On a runner there is nobody to ask, so a naive run either stalls or quietly invents an answer and never mentions it.",
   outro:
     "ASSUMPTIONS.md then lands in the PR body, so review opens with every judgment call made without you. Ambiguity gets an assumption. A genuine block — a product decision, a missing credential — gets BLOCKED.md and a stop, which Ralph turns into a draft PR carrying the question.",
+  note: "Unattended is the default, not the only mode. With session: herdr, the agent works interactively in a session a person can join. Ralph posts the join command on the issue, and the session stays up after the pull request opens.",
   gates: [
     {
       gate: "Agree the test seams",
@@ -249,7 +250,7 @@ export const fileMapContent = {
 
 export const statusContent = {
   heading: "Status",
-  body: "Shellcheck clean and dry-run tested: the pack installs to both harness paths, argument plumbing produces identical argv on bash 3.2 and bash 5, and the brief extractor picks the latest revision on a real issue payload.",
+  body: "Skills resolve in print mode, which was the assumption the design rested on. On a real self-hosted Mac runner, checkout, the pinned pack install, brief extraction from a live issue, branch creation and the no-commits path have all run.",
   unverified:
-    "One assumption has not been proven on a runner — that invoking an entry skill in print mode resolves the skill rather than treating it as literal text. Everything else is plumbing around that. If it does not hold, the fix is inlining the skill body into the prompt and the rest stands.",
+    "Still unobserved: every stage in sequence ending in a pull request, whether the output is worth reviewing across a sample of runs, and more than one runner. The tag stays v0 until those are seen.",
 };

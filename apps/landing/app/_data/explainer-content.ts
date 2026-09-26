@@ -20,6 +20,7 @@ export interface PlayerData {
   title: string;
   description: string;
   subPlayers?: SubPlayer[];
+  live?: string; // Shown with a live dot: this player hosts a joinable session
 }
 
 export const componentsContent: PlayerData[] = [
@@ -27,6 +28,7 @@ export const componentsContent: PlayerData[] = [
     id: "runners",
     title: "Self-Hosted Runners",
     description: "Your laptops, ready to work.",
+    live: "joinable session",
   },
   {
     id: "actions",
@@ -60,6 +62,7 @@ export interface UnifiedStep {
   codeLanguage?: string;
   playerIds: string[]; // Which players are active for this step
   anchor?: string; // Matching stage on /action, for the deep link
+  session?: boolean; // Show the join comment above the code block
 }
 
 export const unifiedSteps: UnifiedStep[] = [
@@ -78,7 +81,7 @@ export const unifiedSteps: UnifiedStep[] = [
     label: "Runner Claims",
     description: "Next available machine picks up the job",
     details:
-      "Whichever team member's self-hosted runner is idle picks up the work. Could be anyone's laptop.",
+      "Whichever team member's self-hosted runner is idle picks up the work. Could be anyone's laptop, and the agent runs as that person: their agent login, their skills, their harness.",
     code: `runs-on: self-hosted
 # Any registered runner can claim this`,
     codeLanguage: "yaml",
@@ -87,14 +90,15 @@ export const unifiedSteps: UnifiedStep[] = [
   },
   {
     label: "AI Codes",
-    description: "Your coding agent iterates through the task",
+    description: "Your coding agent works the task, live and joinable",
     details:
-      "Ralph installs a pinned skill pack and hands the agent the brief. The pack owns the workflow: test, iterate, review. A real pack ships as the default — swap it, or the agent, without touching Ralph.",
+      "Ralph installs a pinned skill pack and hands the agent the brief. The pack owns the workflow: test, iterate, review. A real pack ships as the default — swap it, or the agent, without touching Ralph. With session: herdr the agent codes in a live session: Ralph posts the attach command on the issue, so you can watch or chime in while it works.",
     code: `skills-repo: mattpocock/skills   # the default
 agent: claude                    # or codex, opencode, pi`,
     codeLanguage: "yaml",
     playerIds: ["skills", "claude", "codex", "opencode", "pi"],
     anchor: "pack",
+    session: true,
   },
   {
     label: "PR & Review",
@@ -196,4 +200,21 @@ export const setupChecklistContent = {
       command: "./run.sh",
     },
   ],
+};
+
+export interface SessionCommentData {
+  titlebar: string;
+  author: string;
+  status: string;
+  localLabel: string;
+  localCommand: string;
+}
+
+// The comment Ralph posts on the issue once the session is up.
+export const sessionCommentContent: SessionCommentData = {
+  titlebar: "issue #42 · comment",
+  author: "github-actions",
+  status: "session live on your-mac",
+  localLabel: "join the session: watch, or type to the agent",
+  localCommand: "herdr session attach ralph-42",
 };
