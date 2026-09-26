@@ -250,7 +250,7 @@ export const fileMapContent = {
 
 export const statusContent = {
   heading: "Status",
-  body: "Shellcheck clean and dry-run tested: the pack installs to both harness paths, argument plumbing produces identical argv on bash 3.2 and bash 5, and the brief extractor picks the latest revision on a real issue payload.",
+  body: "Skills resolve in print mode, which was the assumption the design rested on. On a real self-hosted Mac runner, checkout, the pinned pack install, brief extraction from a live issue, branch creation and the no-commits path have all run.",
   unverified:
-    "One assumption has not been proven on a runner — that invoking an entry skill in print mode resolves the skill rather than treating it as literal text. Everything else is plumbing around that. If it does not hold, the fix is inlining the skill body into the prompt and the rest stands.",
+    "Still unobserved: every stage in sequence ending in a pull request, whether the output is worth reviewing across a sample of runs, and more than one runner. The tag stays v0 until those are seen.",
 };
