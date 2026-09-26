@@ -97,11 +97,17 @@ _session_start_agent() {
   # which leaves the pane running a multiplexer instead of a free shell.
   ws="$(_hs workspace create --cwd "$PWD" --label "issue-${ISSUE_NUMBER}" --env ZELLIJ=0 --no-focus)"
   pane="$(echo "$ws" | jq -r '.result.root_pane.pane_id')"
-  sleep 2
-
-  # agent start reports agent_not_ready on stderr, so capture both.
-  out="$(_hs agent start "$SESSION_AGENT" --kind "$AGENT" --pane "$pane" --timeout 90000 \
-           ${AGENT_ARGS_ARR[@]+"--" "${AGENT_ARGS_ARR[@]}"} 2>&1)" || true
+  # The pane is only an available shell once the user's rc files have loaded,
+  # which under a launchd-started runner can take several seconds; until then
+  # herdr answers agent_pane_busy. agent start reports agent_not_ready on
+  # stderr, so capture both.
+  local attempt
+  for attempt in $(seq 15); do
+    out="$(_hs agent start "$SESSION_AGENT" --kind "$AGENT" --pane "$pane" --timeout 90000 \
+             ${AGENT_ARGS_ARR[@]+"--" "${AGENT_ARGS_ARR[@]}"} 2>&1)" || true
+    echo "$out" | grep -q agent_pane_busy || break
+    sleep 2
+  done
 
   if echo "$out" | grep -q agent_not_ready; then
     # A checkout claude has not seen asks whether to trust the folder. Ralph
