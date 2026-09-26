@@ -197,3 +197,96 @@ export const setupChecklistContent = {
     },
   ],
 };
+
+// Where this is heading: the run becomes a session you can join.
+// Keep each status honest. The evidence lives on dtun/ralph-alpha#12.
+export type RoadmapStatus = "v0" | "spike" | "building" | "next";
+
+export const roadmapStatusLabels: Record<RoadmapStatus, string> = {
+  v0: "v0 · runs today",
+  spike: "proven in a spike",
+  building: "in progress",
+  next: "next",
+};
+
+export interface RunsAsYouItem {
+  label: string;
+  detail: string;
+}
+
+export interface SessionStep {
+  label: string;
+  detail: string;
+  status: RoadmapStatus;
+}
+
+export const joinableSessionContent = {
+  eyebrow: "Where this is heading",
+  heading: "Your agentic env, deployed.",
+  intro:
+    "Write the context. File the issue. An agent picks it up on your machine and does the work as you. Not a cloud bot in a blank sandbox: your own setup, running in a live session you can join by pasting one command into a terminal.",
+  runsAsYou: [
+    {
+      label: "Your machine",
+      detail:
+        "A self-hosted runner on your own laptop. Your compute, your checkout.",
+    },
+    {
+      label: "Your Claude",
+      detail:
+        "Interactive claude on your account, with your ~/.claude settings.",
+    },
+    {
+      label: "Your skills & harness",
+      detail: "The same skills and hooks you use at the keyboard.",
+    },
+  ] satisfies RunsAsYouItem[],
+  steps: [
+    {
+      label: "An issue is filed",
+      detail: "Write the context and label it ready-for-agent.",
+      status: "v0",
+    },
+    {
+      label: "Your machine picks it up",
+      detail: "A self-hosted runner claims the job and checks out a branch.",
+      status: "v0",
+    },
+    {
+      label: "Your agent runs in a live session",
+      detail:
+        "The job starts a headless herdr session, launches interactive claude as you, and sends the brief. herdr reads the screen, so it knows whether the agent is idle, working, blocked or done.",
+      status: "spike",
+    },
+    {
+      label: "The session outlives the job",
+      detail:
+        "The job goes green and the session stays up. Attach, read what the agent did, type to it, and it answers.",
+      status: "spike",
+    },
+    {
+      label: "The join command lands on the issue",
+      detail:
+        "An opt-in session: herdr input. When the agent settles, Ralph pushes and opens the draft PR as it does today, leaves the session up, and posts the attach command.",
+      status: "building",
+    },
+    {
+      label: "Join from anywhere",
+      detail:
+        "Attach over SSH from another machine. Relax the AFK rules when a person is there to answer the agent's questions.",
+      status: "next",
+    },
+  ] satisfies SessionStep[],
+  comment: {
+    titlebar: "issue #42 · comment",
+    author: "github-actions",
+    status: "session live on your-mac · claude · idle",
+    pr: "draft PR opened · #43",
+    localLabel: "join on this machine",
+    localCommand: "herdr session attach ralph-42",
+    remoteLabel: "join from anywhere · next, not working yet",
+    remoteCommand: "herdr --remote you@your-mac --session ralph-42",
+  },
+  whyHerdr:
+    "Why herdr and not zellij: on a runner nobody is attached, and herdr can still read the agent's screen and tell when it has finished. zellij can't do that headless.",
+};

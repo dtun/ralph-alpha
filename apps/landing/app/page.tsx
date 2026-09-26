@@ -7,6 +7,7 @@ import { SetupChecklist } from "./_components/setup-checklist";
 import { Footer } from "./_components/footer";
 import { ComingSoonSection } from "./_components/coming-soon-section";
 import { EarlyInvestorSection } from "./_components/early-investor-section";
+import { JoinableSessionSection } from "./_components/joinable-session-section";
 import {
   LaptopIcon,
   WorkflowIcon,
@@ -21,6 +22,8 @@ import {
   comparisonContent,
   fileTreeContent,
   setupChecklistContent,
+  joinableSessionContent,
+  roadmapStatusLabels,
 } from "./_data/explainer-content";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -59,6 +62,18 @@ export default function Home() {
           players={componentsContent}
           steps={unifiedSteps}
           iconMap={iconMap}
+        />
+
+        {/* Where this is heading - a live session you can join */}
+        <JoinableSessionSection
+          eyebrow={joinableSessionContent.eyebrow}
+          heading={joinableSessionContent.heading}
+          intro={joinableSessionContent.intro}
+          runsAsYou={joinableSessionContent.runsAsYou}
+          steps={joinableSessionContent.steps}
+          comment={joinableSessionContent.comment}
+          statusLabels={roadmapStatusLabels}
+          whyHerdr={joinableSessionContent.whyHerdr}
         />
 
         {/* File Structure */}
