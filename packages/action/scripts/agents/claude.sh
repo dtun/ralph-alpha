@@ -16,8 +16,13 @@ agent_preflight() {
     return 1
   }
   # Either an API key in the environment or a persisted subscription login.
-  if [ -z "${ANTHROPIC_API_KEY:-}" ] && [ ! -d "$HOME/.claude" ]; then
-    echo "error: claude is not authenticated. Run 'claude auth login' on this runner, or set ANTHROPIC_API_KEY." >&2
+  # Ask claude rather than look for ~/.claude: the directory survives a login
+  # the runner cannot reach, such as a keychain outside the runner's security
+  # session, and that run then fails inside the agent and reads as no-changes.
+  if [ -z "${ANTHROPIC_API_KEY:-}" ] \
+     && ! claude auth status 2>/dev/null | jq -e '.loggedIn == true' >/dev/null 2>&1; then
+    echo "error: claude is not logged in for this runner. Run 'claude auth login' as the runner user, or set ANTHROPIC_API_KEY." >&2
+    echo "       Logged in but still failing under a launchd service? See 'Running the runner as a service' in the README." >&2
     return 1
   fi
 }
