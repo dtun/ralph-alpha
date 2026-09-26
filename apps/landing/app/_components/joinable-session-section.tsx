@@ -8,7 +8,6 @@ interface SessionComment {
   titlebar: string;
   author: string;
   status: string;
-  pr: string;
   localLabel: string;
   localCommand: string;
   remoteLabel: string;
@@ -27,15 +26,13 @@ interface JoinableSessionSectionProps {
 
 const statusStyles: Record<RoadmapStatus, string> = {
   v0: "text-accent-green border-accent-green/40",
-  spike: "text-accent-yellow border-accent-yellow/40",
-  building: "text-accent-cyan border-accent-cyan/40",
+  proven: "text-accent-yellow border-accent-yellow/40",
   next: "text-light-text-muted dark:text-text-subtle border-dashed border-light-border dark:border-dark-border",
 };
 
 const markerStyles: Record<RoadmapStatus, string> = {
   v0: "border-accent-green text-accent-green",
-  spike: "border-accent-yellow text-accent-yellow",
-  building: "border-accent-cyan text-accent-cyan",
+  proven: "border-accent-yellow text-accent-yellow",
   next: "border-dashed border-light-border dark:border-dark-border text-light-text-muted dark:text-text-subtle",
 };
 
@@ -80,7 +77,7 @@ function IssueCommentMock({
           {comment.titlebar}
         </span>
         <span className="ml-auto">
-          <StatusBadge status="building" labels={labels} />
+          <StatusBadge status="proven" labels={labels} />
         </span>
       </div>
       <div className="terminal-content overflow-x-auto">
@@ -95,9 +92,6 @@ function IssueCommentMock({
                 {" "}
                 commented
               </span>
-            </p>
-            <p className="text-light-text-muted dark:text-text-muted pl-4">
-              <span className="text-accent-green">✓</span> {comment.pr}
             </p>
             <p className="text-light-text-muted dark:text-text-muted pl-4">
               <span className="text-accent-green">✓</span> {comment.status}

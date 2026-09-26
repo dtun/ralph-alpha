@@ -200,12 +200,12 @@ export const setupChecklistContent = {
 
 // Where this is heading: the run becomes a session you can join.
 // Keep each status honest. The evidence lives on dtun/ralph-alpha#12.
-export type RoadmapStatus = "v0" | "spike" | "building" | "next";
+// "proven" means a real end-to-end run on a branch that is not merged yet.
+export type RoadmapStatus = "v0" | "proven" | "next";
 
 export const roadmapStatusLabels: Record<RoadmapStatus, string> = {
   v0: "v0 · runs today",
-  spike: "proven in a spike",
-  building: "in progress",
+  proven: "proven · not merged yet",
   next: "next",
 };
 
@@ -255,20 +255,20 @@ export const joinableSessionContent = {
     {
       label: "Your agent runs in a live session",
       detail:
-        "The job starts a headless herdr session, launches interactive claude as you, and sends the brief. herdr reads the screen, so it knows whether the agent is idle, working, blocked or done.",
-      status: "spike",
-    },
-    {
-      label: "The session outlives the job",
-      detail:
-        "The job goes green and the session stays up. Attach, read what the agent did, type to it, and it answers.",
-      status: "spike",
+        "Opt in with session: herdr. Interactive claude starts as you in a herdr session on the runner, and gets the brief.",
+      status: "proven",
     },
     {
       label: "The join command lands on the issue",
       detail:
-        "An opt-in session: herdr input. When the agent settles, Ralph pushes and opens the draft PR as it does today, leaves the session up, and posts the attach command.",
-      status: "building",
+        "Ralph posts the attach command as a comment. Paste it into a terminal to watch the agent or type to it.",
+      status: "proven",
+    },
+    {
+      label: "A PR opens, and the session stays up",
+      detail:
+        "When the agent settles, verify runs and Ralph pushes and opens the PR as it does today. The session outlives the job, so you can keep steering after review.",
+      status: "proven",
     },
     {
       label: "Join from anywhere",
@@ -280,8 +280,7 @@ export const joinableSessionContent = {
   comment: {
     titlebar: "issue #42 · comment",
     author: "github-actions",
-    status: "session live on your-mac · claude · idle",
-    pr: "draft PR opened · #43",
+    status: "session live on your-mac · claude",
     localLabel: "join on this machine",
     localCommand: "herdr session attach ralph-42",
     remoteLabel: "join from anywhere · next, not working yet",

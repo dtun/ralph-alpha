@@ -102,7 +102,7 @@ export const afkContent = {
     "This is the interesting problem. The pack's skills assume a human is in the room — one of them refuses to write a test at a seam you have not confirmed. On a runner there is nobody to ask, so a naive run either stalls or quietly invents an answer and never mentions it.",
   outro:
     "ASSUMPTIONS.md then lands in the PR body, so review opens with every judgment call made without you. Ambiguity gets an assumption. A genuine block — a product decision, a missing credential — gets BLOCKED.md and a stop, which Ralph turns into a draft PR carrying the question.",
-  note: "Unattended is today's default, not the end state. A spike has run the agent in a herdr session that outlives the job and that a person can attach to. An opt-in session: herdr input is in progress. Relaxing these gates when someone is there to answer comes after that.",
+  note: "Unattended is today's default, not the end state. An opt-in session: herdr mode has completed a real run end to end: the agent worked interactively in a session a person can join, the join command was posted on the issue, and the session stayed up after the pull request opened. It is on a branch that has not merged yet. Relaxing these gates when someone is there to answer comes next.",
   gates: [
     {
       gate: "Agree the test seams",
