@@ -4,23 +4,33 @@ import { useState, useEffect, ReactNode } from "react";
 import Link from "next/link";
 import { ComponentCard } from "./component-card";
 import { CodeBlock } from "./code-block";
-import { UnifiedStep, PlayerData } from "../_data/explainer-content";
+import { SessionComment, StatusBadge, LiveDot } from "./session-comment";
+import {
+  UnifiedStep,
+  PlayerData,
+  RoadmapStatus,
+  SessionCommentData,
+} from "../_data/explainer-content";
 
 interface PlayerWorkflowProps {
   players: PlayerData[];
   steps: UnifiedStep[];
   iconMap: Record<string, ReactNode>;
+  sessionComment: SessionCommentData;
+  statusLabels: Record<RoadmapStatus, string>;
 }
 
 function StepIndicator({
   stepNumber,
   label,
   isActive,
+  live = false,
   onClick,
 }: {
   stepNumber: number;
   label: string;
   isActive: boolean;
+  live?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -33,7 +43,7 @@ function StepIndicator({
     >
       <div
         className={`
-          w-10 h-10 rounded-md flex items-center justify-center
+          relative w-10 h-10 rounded-md flex items-center justify-center
           font-mono font-semibold text-sm transition-all duration-150 border
           ${
             isActive
@@ -43,6 +53,11 @@ function StepIndicator({
         `}
       >
         {stepNumber}
+        {live && (
+          <span className="absolute -top-1 -right-1 flex">
+            <LiveDot />
+          </span>
+        )}
       </div>
       <span
         className={`
@@ -74,6 +89,8 @@ export function PlayerWorkflow({
   players,
   steps,
   iconMap,
+  sessionComment,
+  statusLabels,
 }: PlayerWorkflowProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -164,6 +181,7 @@ export function PlayerWorkflow({
               description={player.description}
               isActive={isActive}
               subPlayers={subPlayersWithState}
+              live={player.live}
             />
           );
         })}
@@ -177,6 +195,7 @@ export function PlayerWorkflow({
             stepNumber={index + 1}
             label={s.label}
             isActive={index === activeStep}
+            live={s.session}
             onClick={() => handleStepClick(index)}
           />
         ))}
@@ -199,13 +218,16 @@ export function PlayerWorkflow({
         </div>
 
         <div className="terminal-content">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
             <span className="font-mono text-sm text-accent-yellow">
               [{activeStep + 1}]
             </span>
             <h3 className="font-mono text-lg font-semibold text-light-text dark:text-text-primary">
               {step.label}
             </h3>
+            <span className="ml-auto">
+              <StatusBadge status={step.status} labels={statusLabels} />
+            </span>
           </div>
 
           <p className="text-base text-light-text dark:text-text-primary mb-3">
@@ -214,6 +236,12 @@ export function PlayerWorkflow({
           <p className="text-sm text-light-text-muted dark:text-text-muted mb-6">
             {step.details}
           </p>
+
+          {step.session && (
+            <div className="mb-6">
+              <SessionComment comment={sessionComment} />
+            </div>
+          )}
 
           {step.code && (
             <div className="mb-6">

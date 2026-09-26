@@ -24,6 +24,7 @@ import {
   setupChecklistContent,
   joinableSessionContent,
   roadmapStatusLabels,
+  sessionCommentContent,
 } from "./_data/explainer-content";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -62,6 +63,8 @@ export default function Home() {
           players={componentsContent}
           steps={unifiedSteps}
           iconMap={iconMap}
+          sessionComment={sessionCommentContent}
+          statusLabels={roadmapStatusLabels}
         />
 
         {/* Where this is heading - a live session you can join */}
@@ -71,7 +74,6 @@ export default function Home() {
           intro={joinableSessionContent.intro}
           runsAsYou={joinableSessionContent.runsAsYou}
           steps={joinableSessionContent.steps}
-          comment={joinableSessionContent.comment}
           statusLabels={roadmapStatusLabels}
         />
 
