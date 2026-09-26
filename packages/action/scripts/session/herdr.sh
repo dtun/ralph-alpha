@@ -141,7 +141,7 @@ _ms_left() {
 }
 
 session_run() {
-  local prompt_file="$1" text out state attempt asked=false
+  local prompt_file="$1" text out state attempt asked=false posted_question=""
 
   _session_reap
   say "Starting herdr session ${SESSION_NAME}"
@@ -192,7 +192,29 @@ EOF
     fi
 
     case "$state" in
-      idle|done) break ;;
+      idle|done)
+        # Settled, but a question in plain text looks idle too, so the
+        # session preamble has the agent flag one in WAITING.md.
+        [ -f "$RALPH_DIR/WAITING.md" ] || break
+        if [ "$(cat "$RALPH_DIR/WAITING.md")" != "$posted_question" ]; then
+          posted_question="$(cat "$RALPH_DIR/WAITING.md")"
+          say "Agent asked a question and is waiting for an answer."
+          gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
+🤖 **The agent has a question.** Join the session to answer it:
+
+$(_session_attach_help)
+
+$(head -60 "$RALPH_DIR/WAITING.md")
+EOF
+)" > /dev/null
+        fi
+        # An answer shows up as the agent going back to work; then let it
+        # settle again and look at what it left.
+        out="$(_hs agent wait "$SESSION_AGENT" --until working --timeout "$(_ms_left)" 2>&1)" || true
+        if ! echo "$out" | grep -q '"error"'; then
+          out="$(_hs agent wait "$SESSION_AGENT" --timeout "$(_ms_left)" 2>&1)" || true
+        fi
+        ;;
       blocked)
         # The agent is waiting on a question or an approval. That is what
         # joining is for: say so once, then wait for someone to answer.
@@ -211,6 +233,14 @@ EOF
       *) break ;;
     esac
   done
+
+  # Nobody answered in time. The question is still the most useful thing the
+  # run produced, so hand it to the existing blocked path, which opens a PR
+  # carrying it.
+  if [ -f "$RALPH_DIR/WAITING.md" ]; then
+    say "Question went unanswered; reporting it as a block."
+    mv "$RALPH_DIR/WAITING.md" "$RALPH_DIR/BLOCKED.md"
+  fi
 
   echo "---- agent screen (tail) ----"
   _session_screen 40 | tail -40

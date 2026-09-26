@@ -136,6 +136,12 @@ sed -e "s|{{BASE_REF}}|${BASE_REF}|g" \
     -e "s|{{ISSUE_NUMBER}}|${ISSUE_NUMBER}|g" \
     "$ACTION_PATH/scripts/afk-preamble.md" > "$WORK/prompt.md"
 
+# A joinable run relaxes the AFK rules: a block becomes a question someone can
+# answer in the session. The addendum only overrides what assumes nobody is there.
+if [ "$SESSION_MODE" = herdr ]; then
+  cat "$ACTION_PATH/scripts/session-preamble.md" >> "$WORK/prompt.md"
+fi
+
 {
   echo
   echo "---"
