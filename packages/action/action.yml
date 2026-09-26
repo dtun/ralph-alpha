@@ -65,6 +65,35 @@ inputs:
     required: false
     default: "true"
 
+  session:
+    description: >-
+      none runs the agent headless. herdr runs it interactively in a named herdr
+      session on the runner that people can join to watch or chime in, and
+      leaves the session up after the run. Requires herdr on the runner;
+      agent: claude only for now.
+    required: false
+    default: "none"
+
+  session-ssh-host:
+    description: >-
+      Host people should SSH to when joining a herdr session, e.g. a Tailscale
+      name. When set, the join comment includes a herdr --remote command.
+    required: false
+    default: ""
+
+  session-ttl-hours:
+    description: "Stop Ralph's herdr sessions that have been idle this long. Checked at the start of each run."
+    required: false
+    default: "24"
+
+  session-wait-minutes:
+    description: >-
+      How long a herdr session waits for someone to answer the agent's
+      question. The agent's timeout-minutes clock is paused while it waits.
+      An unanswered question becomes a block.
+    required: false
+    default: "60"
+
   github-token:
     description: >-
       Token for issue and PR operations. Note: PRs opened with the default
@@ -120,5 +149,9 @@ runs:
         RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         RUNNER_LABEL: ${{ runner.name }}
         ACTION_PATH: ${{ github.action_path }}
+        SESSION_MODE: ${{ inputs.session }}
+        SESSION_SSH_HOST: ${{ inputs.session-ssh-host }}
+        SESSION_TTL_HOURS: ${{ inputs.session-ttl-hours }}
+        SESSION_WAIT_MINUTES: ${{ inputs.session-wait-minutes }}
         GH_TOKEN: ${{ inputs.github-token }}
       run: ${{ github.action_path }}/scripts/ralph.sh

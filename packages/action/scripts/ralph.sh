@@ -18,6 +18,7 @@ RUN_NUMBER="${RUN_NUMBER:-0}"
 RUN_URL="${RUN_URL:-}"
 RUNNER_LABEL="${RUNNER_LABEL:-unknown}"
 ACTION_PATH="${ACTION_PATH:?}"
+SESSION_MODE="${SESSION_MODE:-none}"
 
 BRANCH="ralph/${ISSUE_NUMBER}/${RUN_NUMBER}"
 RALPH_DIR=".ralph"
@@ -47,6 +48,19 @@ AGENT_ARGS_ARR=()
 # shellcheck source=/dev/null
 source "$ADAPTER"
 agent_preflight
+
+case "$SESSION_MODE" in
+  none) ;;
+  herdr)
+    # shellcheck source=session/herdr.sh
+    source "$ACTION_PATH/scripts/session/herdr.sh"
+    session_preflight
+    ;;
+  *)
+    echo "error: unknown session mode '$SESSION_MODE'. Use none or herdr." >&2
+    exit 1
+    ;;
+esac
 
 # ------------------------------------------------------------ preconditions --
 
@@ -122,6 +136,12 @@ sed -e "s|{{BASE_REF}}|${BASE_REF}|g" \
     -e "s|{{ISSUE_NUMBER}}|${ISSUE_NUMBER}|g" \
     "$ACTION_PATH/scripts/afk-preamble.md" > "$WORK/prompt.md"
 
+# A joinable run relaxes the AFK rules: a block becomes a question someone can
+# answer in the session. The addendum only overrides what assumes nobody is there.
+if [ "$SESSION_MODE" = herdr ]; then
+  cat "$ACTION_PATH/scripts/session-preamble.md" >> "$WORK/prompt.md"
+fi
+
 {
   echo
   echo "---"
@@ -162,7 +182,11 @@ EOF
 
 say "Running ${AGENT} ${COMMAND} (budget ${TIMEOUT_MINUTES}m)"
 AGENT_STATUS=0
-if [ -n "$TIMEOUT_BIN" ]; then
+if [ "$SESSION_MODE" = herdr ]; then
+  # Interactive and joinable. session_run owns the budget itself and returns
+  # 124 at it, so everything below treats both modes the same.
+  session_run "$WORK/prompt.md" || AGENT_STATUS=$?
+elif [ -n "$TIMEOUT_BIN" ]; then
   # timeout(1) needs a command, so the adapter function and its argument array
   # are serialised into the subshell. Arrays are not exported, so passthrough
   # flags would be silently dropped without the declare -p.
@@ -256,6 +280,7 @@ elif [ "$COMMITS" -eq 0 ]; then
 🤖 **Ralph made no changes.**
 
 The agent ran but produced no commits.$( [ "$TIMED_OUT" = true ] && echo " It hit the ${TIMEOUT_MINUTES}m budget first." )
+${SESSION_NOTE:-}
 
 [Run log](${RUN_URL}) · this issue keeps its current labels.
 EOF
@@ -308,6 +333,7 @@ ASSUMPTIONS=""
     echo "$ASSUMPTIONS"
     echo
   fi
+  [ -n "${SESSION_NOTE:-}" ] && { echo "$SESSION_NOTE"; echo; }
   echo "---"
   echo
   echo "🤖 Ralph · agent \`${AGENT}\` · skills \`${SKILLS_RESOLVED_SHA:-unknown}\` · runner \`${RUNNER_LABEL}\` · [run log](${RUN_URL})"

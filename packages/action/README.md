@@ -64,6 +64,29 @@ brew install gh jq coreutils   # coreutils gives macOS a timeout(1)
 gh auth login
 ```
 
+### Running the runner as a service
+
+`./svc.sh install && ./svc.sh start` keeps the runner up across logouts and
+reboots, and gives jobs the PATH saved in the runner's `.path`. `run.sh` uses
+whatever PATH it was started with.
+
+On macOS the service needs one change before Ralph works under it. The
+generated LaunchAgent sets `SessionCreate`, which starts the runner in a fresh
+security session **without your login keychain**. That is where `claude` and
+`gh` keep their logins, so the agent reports "Not logged in" and `gh` loses
+its auth. Remove the key and restart:
+
+```bash
+plist=~/Library/LaunchAgents/actions.runner.<owner>-<repo>.<runner>.plist
+plutil -remove SessionCreate "$plist"
+./svc.sh stop && ./svc.sh start
+```
+
+Re-running `./svc.sh install` regenerates the plist, so repeat this after any
+reinstall. Ralph's preflight asks `claude auth status`, so a runner that
+cannot reach the login fails up front, before an agent runs and reports
+nothing.
+
 **Once per repo** — run the pack's setup skill locally, in a normal session:
 
 ```
@@ -107,6 +130,10 @@ need a workflow that cannot shift under you.
 | `verify`          | —                   | outer guard; failure forces draft                                      |
 | `timeout-minutes` | `45`                | wall-clock budget                                                      |
 | `draft`           | `true`              |                                                                        |
+| `session`         | `none`              | `herdr` runs the agent in a joinable session — see [below](#joinable-sessions-herdr) |
+| `session-ssh-host`| —                   | host to SSH to when joining; adds a `herdr --remote` line to the join comment |
+| `session-ttl-hours`| `24`               | Ralph's sessions idle this long are stopped at the next run            |
+| `session-wait-minutes`| `60`            | how long a question waits for an answer; the agent's clock is paused meanwhile |
 | `github-token`    | `github.token`      | pass a PAT to get CI on Ralph's PRs                                    |
 
 Outputs: `status` (`success` \| `blocked` \| `no-changes` \| `failed`),
@@ -173,6 +200,56 @@ project-local resources. An installed skill pack is a project-local resource.
 So `pi -p "/implement …"` without `--approve` runs your prompt with **zero
 skills loaded and still exits 0**: a plausible PR built from none of the
 workflow, with nothing in the log saying so. The adapter always passes `-a`.
+
+## Joinable sessions (herdr)
+
+With `session: herdr`, the agent runs **interactively**, as you, inside a named
+[herdr](https://herdr.dev) session on the runner, not headless. Ralph
+comments on the issue with the command to join:
+
+```
+herdr session attach ralph-<issue>-<run>
+```
+
+Anyone with a shell on the runner can join to watch, answer a question or keep
+steering. When the agent settles, the job carries on as usual: sweep, verify,
+push, PR. The session **stays up afterwards** so you can review in place. The
+next run for the same issue replaces it, and sessions idle longer than
+`session-ttl-hours` are stopped at the start of any run.
+
+What changes compared with headless mode:
+
+- **It runs as you.** The session starts without the workflow token, so the
+  agent's `gh` uses the runner user's own login. It keeps working after the
+  job ends, when the workflow token has expired. Claude runs with your own
+  settings and permission mode. For a fully unattended run, pass
+  `agent-args: --permission-mode bypassPermissions`.
+- **A block becomes a question.** A session addendum to the AFK preamble
+  ([`session-preamble.md`](./scripts/session-preamble.md)) changes one rule:
+  instead of writing `BLOCKED.md` and stopping, the agent writes its question
+  to `.ralph/WAITING.md`, asks it in the session, and waits. Ralph posts the
+  question on the issue with the join command. Answer it in the session and the
+  agent records the decision and carries on. The agent's `timeout-minutes`
+  clock is paused while it waits; the wait has its own cap,
+  `session-wait-minutes`. If nobody answers in time, the question becomes a
+  normal block and still gets a PR. The job's own `timeout-minutes` still
+  caps everything, so leave room for both.
+- **Approvals reach a human too.** If the agent stops at a permission or
+  approval prompt, Ralph comments "waiting for input" and waits the same way.
+- **What you type is an amendment.** Messages typed into the session outrank
+  the brief, and the agent records any change of scope in
+  `.ralph/ASSUMPTIONS.md` so the reviewer sees it.
+- **The brief is in a file.** The prompt is `<command> the work for issue #N`,
+  pointing at `.ralph/PROMPT.md`. That keeps the slash command at the start of
+  the input, where the harness resolves it.
+
+Requirements: `herdr` on the runner, and `agent: claude`. herdr also drives
+other agents, but only Claude has been run end to end so far. Joining from
+another machine needs SSH to the runner. Set `session-ssh-host` and the join
+comment gains `herdr --remote you@host --session …`.
+
+The design and the runs behind each workaround are in
+[ralph-alpha#12](https://github.com/dtun/ralph-alpha/issues/12).
 
 ## Running unattended skills that were written to be interactive
 
