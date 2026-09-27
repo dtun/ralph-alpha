@@ -20,6 +20,8 @@ RUNNER_LABEL="${RUNNER_LABEL:-unknown}"
 ACTION_PATH="${ACTION_PATH:?}"
 SESSION_MODE="${SESSION_MODE:-none}"
 TOKEN_SUPPLIED="${TOKEN_SUPPLIED:-false}"
+REPO="${GITHUB_REPOSITORY:-$(gh repo view --json nameWithOwner --jq .nameWithOwner)}"
+SERVER_URL="${GITHUB_SERVER_URL:-https://github.com}"
 
 BRANCH="ralph/${ISSUE_NUMBER}/${RUN_NUMBER}"
 RALPH_DIR=".ralph"
@@ -94,6 +96,40 @@ fi
 if [ "$TOKEN_SUPPLIED" != true ]; then
   say "warning: running on the default GITHUB_TOKEN — no workflows will run on the PR this opens."
   say "         Pass a PAT or GitHub App token as github-token to get CI."
+fi
+
+# The default token has a second, sharper limit: a repo can forbid it from
+# opening pull requests at all. That is Settings → Actions → General → Workflow
+# permissions → "Allow GitHub Actions to create and approve pull requests", and
+# it is off by default on new repos. Nothing trips over it until gh pr create,
+# after the agent has spent its whole budget — so ask up front when we can.
+#
+# "When we can" carries weight. The endpoint needs Administration: read, which
+# GITHUB_TOKEN cannot be granted, so on the default token this read is expected
+# to be refused. Only a definite false fails the run. A read we cannot make is
+# a warning, never a guess: refusing a correctly configured repo is worse than
+# finding out at the end, and the ship step reports that case in full.
+#
+# A PAT or App token is not subject to the setting, so there is nothing to ask.
+if [ "$TOKEN_SUPPLIED" != true ]; then
+  CAN_OPEN_PRS="$(gh api "repos/${REPO}/actions/permissions/workflow" \
+    --jq '.can_approve_pull_request_reviews' 2>/dev/null || true)"
+  case "$CAN_OPEN_PRS" in
+    true) ;;
+    false)
+      echo "error: this repo does not allow GitHub Actions to open pull requests." >&2
+      echo "       Enable Settings → Actions → General → Workflow permissions →" >&2
+      echo "       \"Allow GitHub Actions to create and approve pull requests\"," >&2
+      echo "       or pass a PAT or GitHub App token as github-token." >&2
+      exit 1
+      ;;
+    *)
+      say "warning: could not read whether GitHub Actions may open pull requests here"
+      say "         (the default GITHUB_TOKEN cannot read that setting). If it is off, the"
+      say "         work will be pushed but no PR opened. Check Settings → Actions → General →"
+      say "         \"Allow GitHub Actions to create and approve pull requests\"."
+      ;;
+  esac
 fi
 
 # ------------------------------------------------------------------ intake ---
@@ -278,7 +314,8 @@ else
   STATUS="success"
 fi
 say "Status: ${STATUS}"
-emit "status" "$STATUS"
+# Emitted where the run ends, not here: "success" is only true once a PR
+# exists, and the ship step below can still fail after the push.
 
 # A block with no commits still earns a PR. The BLOCKED.md the agent wrote is
 # the most considered thing the run produced — the reasoning and the options it
@@ -299,6 +336,7 @@ ${SESSION_NOTE:-}
 [Run log](${RUN_URL}) · this issue keeps its current labels.
 EOF
 )" > /dev/null
+  emit "status" "$STATUS"
   exit 0
 fi
 
@@ -358,7 +396,68 @@ ASSUMPTIONS=""
 PR_ARGS=(--title "$ISSUE_TITLE" --body-file "$WORK/pr-body.md" --base "$BASE_REF" --head "$BRANCH")
 [ "$PR_DRAFT" = "true" ] && PR_ARGS+=(--draft)
 
-PR_URL="$(gh pr create "${PR_ARGS[@]}")"
+# The branch is already pushed, so a failure here must not be the last thing
+# the run does. Under set -e it used to be: the step went red, the issue still
+# said only "picked this up", and the PR body above — verify output,
+# assumptions, warnings — died with $WORK. Now the body goes to the job
+# summary, the issue is told where the work is, and the run still fails.
+if ! PR_URL="$(gh pr create "${PR_ARGS[@]}" 2> "$WORK/pr-create.err")"; then
+  PR_ERROR="$(cat "$WORK/pr-create.err")"
+  COMPARE_URL="${SERVER_URL}/${REPO}/compare/${BASE_REF}...${BRANCH}?expand=1"
+  say "error: gh pr create failed after pushing ${BRANCH}:"
+  echo "$PR_ERROR" >&2
+
+  # The one cause we can name. See the preflight check above.
+  PR_FIX=""
+  if echo "$PR_ERROR" | grep -q "not permitted to create or approve pull requests"; then
+    PR_FIX="This repo does not let GitHub Actions open pull requests. Enable **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**, or pass a PAT or GitHub App token as \`github-token\`."
+    say "         Fix: enable \"Allow GitHub Actions to create and approve pull requests\""
+    say "         under Settings → Actions → General, or pass a PAT or App token."
+  fi
+
+  {
+    echo "## 🤖 Ralph pushed \`${BRANCH}\` but could not open the pull request"
+    echo
+    echo "[Open it by hand](${COMPARE_URL}) with the body below."
+    echo
+    echo '```'
+    echo "$PR_ERROR"
+    echo '```'
+    echo
+    [ -n "$PR_FIX" ] && { echo "$PR_FIX"; echo; }
+    echo "---"
+    echo
+    cat "$WORK/pr-body.md"
+    # Rendered above for reading, raw here for pasting. Four backticks, because
+    # verify output in the body already uses three.
+    echo "<details><summary>Markdown to paste into the PR</summary>"
+    echo
+    echo '````markdown'
+    cat "$WORK/pr-body.md"
+    echo '````'
+    echo
+    echo "</details>"
+  } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+
+  # The work exists but the run did not deliver what it promises, so this is
+  # a failure whatever the agent achieved. The branch output says where it is.
+  emit "status" "failed"
+  gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
+🤖 **Ralph finished, but could not open a pull request.**
+
+The work is pushed to \`${BRANCH}\` — [open a PR from it](${COMPARE_URL}). The PR description Ralph drafted is in the [run summary](${RUN_URL}).
+
+\`\`\`
+${PR_ERROR}
+\`\`\`
+${PR_FIX:+
+${PR_FIX}
+}
+EOF
+)" > /dev/null || say "warning: could not comment on issue #${ISSUE_NUMBER} either."
+  exit 1
+fi
+emit "status" "$STATUS"
 say "Opened ${PR_URL}"
 emit "pr_url" "$PR_URL"
 

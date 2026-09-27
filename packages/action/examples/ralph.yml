@@ -18,6 +18,9 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 60
 
+    # On the default token, also enable Settings → Actions → General →
+    # "Allow GitHub Actions to create and approve pull requests". It is off
+    # on new repos and these permissions do not override it — see the README.
     permissions:
       contents: write
       pull-requests: write

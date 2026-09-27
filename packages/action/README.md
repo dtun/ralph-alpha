@@ -100,6 +100,39 @@ the workflow's `if:` to match the right-hand column of `triage-labels.md`.
 
 Then copy [`examples/ralph.yml`](./examples/ralph.yml) into `.github/workflows/`.
 
+### Letting GitHub Actions open pull requests
+
+On the default `GITHUB_TOKEN`, one repo setting decides whether Ralph can open
+a pull request at all: **Settings → Actions → General → Workflow permissions →
+Allow GitHub Actions to create and approve pull requests**. It is off by
+default on new repos, and the workflow's `pull-requests: write` does not
+override it. With it off, the agent does all its work, Ralph pushes the
+branch, and `gh pr create` fails with:
+
+```
+GitHub Actions is not permitted to create or approve pull requests (createPullRequest)
+```
+
+Tick the box once per repo (an organization can also turn it off for every
+repo it owns, so check there if the box is greyed out), or check from a
+terminal with an admin login:
+
+```bash
+gh api repos/<owner>/<repo>/actions/permissions/workflow   # can_approve_pull_request_reviews
+gh api -X PUT repos/<owner>/<repo>/actions/permissions/workflow \
+  -F can_approve_pull_request_reviews=true
+```
+
+Ralph tries to catch this in preflight, before the agent runs, but reading the
+setting needs **Administration: read** — which `GITHUB_TOKEN` cannot be granted.
+So on the default token the check usually cannot see the answer and only warns.
+If the setting is off anyway, Ralph still reports properly: it comments on the
+issue with the branch, a link to open the PR by hand and the fix, puts the PR
+body it drafted in the run's job summary, and fails the run.
+
+A PAT or GitHub App token passed as `github-token` is not subject to this
+setting, which is one more reason to [use one](#ci-on-ralphs-pull-requests).
+
 ## CI on Ralph's pull requests
 
 Read this before you merge anything Ralph opens.
@@ -373,6 +406,10 @@ useful outcome rather than a wasted one.
 - **Budget exhausted** — the work so far ships as a draft, flagged on the PR.
 - **`verify` fails** — draft PR with the tail of the output in the body.
 - **No agent brief** — runs conservatively, flags it prominently.
+- **The PR cannot be opened** — the branch is already pushed, so the issue gets
+  the branch, a compare link and the error, the drafted PR body goes to the job
+  summary, and the run fails with `status: failed`. The usual cause is
+  [a repo setting](#letting-github-actions-open-pull-requests).
 
 ## What has actually been observed
 

@@ -213,6 +213,11 @@ export const trapsContent = {
       tell: "by design",
       body: "GitHub does not trigger pull_request workflows for pull requests opened with the default token, to prevent recursion. Left alone, the agent's work would be the only work arriving unchecked. Pass a PAT or App token to get CI back.",
     },
+    {
+      title: "New repos will not let Actions open a pull request",
+      tell: "after the push",
+      body: "\"Allow GitHub Actions to create and approve pull requests\" is off by default, and pull-requests: write does not override it. The first real run did ten minutes of good work, pushed the branch, and died at gh pr create — the issue still said only \"picked this up\" and the drafted PR body was gone. The default token cannot read the setting, so preflight can usually only warn; a failed PR now leaves the branch, a compare link and the fix on the issue, and the body in the job summary.",
+    },
   ] satisfies Trap[],
 };
 
