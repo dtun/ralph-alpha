@@ -20,6 +20,7 @@ RUNNER_LABEL="${RUNNER_LABEL:-unknown}"
 ACTION_PATH="${ACTION_PATH:?}"
 SESSION_MODE="${SESSION_MODE:-none}"
 TOKEN_SUPPLIED="${TOKEN_SUPPLIED:-false}"
+REPO="${GITHUB_REPOSITORY:-$(gh repo view --json nameWithOwner --jq .nameWithOwner)}"
 
 BRANCH="ralph/${ISSUE_NUMBER}/${RUN_NUMBER}"
 RALPH_DIR=".ralph"
@@ -94,6 +95,40 @@ fi
 if [ "$TOKEN_SUPPLIED" != true ]; then
   say "warning: running on the default GITHUB_TOKEN — no workflows will run on the PR this opens."
   say "         Pass a PAT or GitHub App token as github-token to get CI."
+fi
+
+# The default token has a second, sharper limit: a repo can forbid it from
+# opening pull requests at all. That is Settings → Actions → General → Workflow
+# permissions → "Allow GitHub Actions to create and approve pull requests", and
+# it is off by default on new repos. Nothing trips over it until gh pr create,
+# after the agent has spent its whole budget — so ask up front when we can.
+#
+# "When we can" carries weight. The endpoint needs Administration: read, which
+# GITHUB_TOKEN cannot be granted, so on the default token this read is expected
+# to be refused. Only a definite false fails the run. A read we cannot make is
+# a warning, never a guess: refusing a correctly configured repo is worse than
+# finding out at the end.
+#
+# A PAT or App token is not subject to the setting, so there is nothing to ask.
+if [ "$TOKEN_SUPPLIED" != true ]; then
+  CAN_OPEN_PRS="$(gh api "repos/${REPO}/actions/permissions/workflow" \
+    --jq '.can_approve_pull_request_reviews' 2>/dev/null || true)"
+  case "$CAN_OPEN_PRS" in
+    true) ;;
+    false)
+      echo "error: this repo does not allow GitHub Actions to open pull requests." >&2
+      echo "       Enable Settings → Actions → General → Workflow permissions →" >&2
+      echo "       \"Allow GitHub Actions to create and approve pull requests\"," >&2
+      echo "       or pass a PAT or GitHub App token as github-token." >&2
+      exit 1
+      ;;
+    *)
+      say "warning: could not read whether GitHub Actions may open pull requests here"
+      say "         (the default GITHUB_TOKEN cannot read that setting). If it is off, the"
+      say "         work will be pushed but no PR opened. Check Settings → Actions → General →"
+      say "         \"Allow GitHub Actions to create and approve pull requests\"."
+      ;;
+  esac
 fi
 
 # ------------------------------------------------------------------ intake ---
