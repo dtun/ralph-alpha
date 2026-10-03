@@ -161,7 +161,7 @@ consumes no seat, and its token is minted per run and expires in an hour:
     app-id: ${{ vars.RALPH_APP_ID }}
     private-key: ${{ secrets.RALPH_APP_PRIVATE_KEY }}
 
-- uses: dtun/ralph-alpha/packages/action@v0
+- uses: dtun/ralph-alpha/packages/action@v0.1.1
   with:
     github-token: ${{ steps.app-token.outputs.token }}
 ```
@@ -174,7 +174,7 @@ PR, and comments on the issue.
 Same three permissions, stored as a repository secret:
 
 ```yaml
-- uses: dtun/ralph-alpha/packages/action@v0
+- uses: dtun/ralph-alpha/packages/action@v0.1.1
   with:
     github-token: ${{ secrets.RALPH_PAT }}
 ```
@@ -185,17 +185,26 @@ to you personally, and the run breaks on whatever day the token expires.
 ## Versioning
 
 ```yaml
-- uses: dtun/ralph-alpha/packages/action@v0
+- uses: dtun/ralph-alpha/packages/action@v0.1.1
 ```
 
-**`v0` means no stability promise.** Inputs may be renamed and behaviour may
-change between releases while the design is still being proven on real runs.
-The tag moves as fixes land, so you get them without editing your workflow —
-and you inherit breaking changes the same way. Pin a commit SHA instead if you
-need a workflow that cannot shift under you.
+**Pin an exact version.** Version tags never move, so a workflow on `v0.1.1`
+runs the same code until you change it. To pick up a fix, bump the version.
+[Releases](https://github.com/dtun/ralph-alpha/releases) lists them, with
+anything that changes how a workflow behaves called out.
 
-`v1` will mean the inputs have settled. It does not exist yet, and the
+**`0.x` means no stability promise.** Inputs may be renamed and behaviour may
+change between minor versions while the design is still being proven on real
+runs.
+
+The `v0` tag is frozen at `v0.1.0`. It used to be described as moving with
+fixes, but moving a tag needs a force push, and this repo doesn't do those. If
+you are on `@v0`, switch to an exact version.
+
+`v1` will mean the inputs have settled. It will also be a branch you can follow
+as `@v1` for fixes without editing. It does not exist yet, and the
 [open questions](#what-has-actually-been-observed) below are why.
+[RELEASING.md](../../RELEASING.md) has the whole process.
 
 ## Inputs
 
@@ -443,7 +452,7 @@ Still unobserved:
 - **More than one runner.** The multiplayer claim has never been tested with
   two machines.
 
-The tag stays `v0` until the input names have settled.
+Ralph stays on `0.x` until the input names have settled.
 
 ## Known gaps
 
