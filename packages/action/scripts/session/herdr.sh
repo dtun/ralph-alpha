@@ -155,14 +155,14 @@ session_run() {
   _session_start_server || return 1
   _session_start_agent  || return 1
 
-  gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
+  tracker_comment "$ISSUE_NUMBER" "$(cat <<EOF
 🤖 **Live session.** The agent is running in herdr on \`${RUNNER_LABEL}\`. Join it to watch or chime in:
 
 $(_session_attach_help)
 
 The session stays up after the run for review; the next run for this issue replaces it.
 EOF
-)" > /dev/null
+)"
 
   # The brief lives in a file, not in the typed prompt: it is long, and the
   # slash command has to lead the input for the harness to resolve it.
@@ -206,14 +206,14 @@ EOF
         if [ "$(cat "$RALPH_DIR/WAITING.md")" != "$posted_question" ]; then
           posted_question="$(cat "$RALPH_DIR/WAITING.md")"
           say "Agent asked a question and is waiting for an answer."
-          gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
+          tracker_comment "$ISSUE_NUMBER" "$(cat <<EOF
 🤖 **The agent has a question.** Join the session to answer it:
 
 $(_session_attach_help)
 
 $(head -60 "$RALPH_DIR/WAITING.md")
 EOF
-)" > /dev/null
+)"
         fi
         # An answer shows up as the agent going back to work. Waiting for a
         # human is not the agent working, so the agent's clock stops here:
@@ -237,12 +237,12 @@ EOF
         if [ "$asked" = false ]; then
           asked=true
           say "Agent is waiting for input."
-          gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
+          tracker_comment "$ISSUE_NUMBER" "$(cat <<EOF
 🤖 **The agent is waiting for input.** Join the session to answer:
 
 $(_session_attach_help)
 EOF
-)" > /dev/null
+)"
         fi
         out="$(_hs agent wait "$SESSION_AGENT" --until idle --until "done" --timeout "$(_ms_left)" 2>&1)" || true
         ;;

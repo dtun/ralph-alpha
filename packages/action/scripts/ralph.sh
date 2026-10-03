@@ -65,6 +65,15 @@ case "$SESSION_MODE" in
     ;;
 esac
 
+# ---------------------------------------------------------------- tracker ----
+
+# Where the issue lives: reading it, commenting on it, closing it from the PR.
+# Only GitHub for now; the PR itself always goes through gh, whatever the
+# tracker. See scripts/trackers/README.md.
+# shellcheck source=trackers/github.sh
+source "$ACTION_PATH/scripts/trackers/github.sh"
+tracker_preflight
+
 # ------------------------------------------------------------ preconditions --
 
 # The skill pack expects per-repo config written by its setup skill. Failing
@@ -74,6 +83,8 @@ if [ ! -f "docs/agents/issue-tracker.md" ]; then
   say "         Run the pack's setup skill in this repo once, locally, before relying on Ralph."
 fi
 
+# The GitHub tracker checks for gh too, but the push and the PR need it
+# whichever tracker the issue lives in.
 command -v gh >/dev/null 2>&1 || { echo "error: 'gh' not found on this runner." >&2; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo "error: 'jq' not found on this runner." >&2; exit 1; }
 
@@ -134,8 +145,8 @@ fi
 
 # ------------------------------------------------------------------ intake ---
 
-say "Reading issue #${ISSUE_NUMBER}"
-gh issue view "$ISSUE_NUMBER" --json title,body,comments > "$WORK/issue.json"
+say "Reading issue $(tracker_ref "$ISSUE_NUMBER")"
+tracker_fetch "$ISSUE_NUMBER" "$WORK/issue.json"
 
 ISSUE_TITLE="$(jq -r '.title' "$WORK/issue.json")"
 jq -r '.body // ""' "$WORK/issue.json" > "$WORK/body.md"
@@ -221,12 +232,12 @@ fi
 
 # ------------------------------------------------------------------- claim ---
 
-gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
+tracker_comment "$ISSUE_NUMBER" "$(cat <<EOF
 🤖 **Ralph picked this up** — \`${RUNNER_LABEL}\`, agent \`${AGENT}\`, skills \`${SKILLS_RESOLVED_SHA:0:7}\`
 
 Branch \`${BRANCH}\`. [Follow along](${RUN_URL}).
 EOF
-)" > /dev/null
+)"
 
 # --------------------------------------------------------------------- run ---
 
@@ -327,7 +338,7 @@ if [ "$COMMITS" -eq 0 ] && [ "$BLOCKED" = true ]; then
   git commit -q --allow-empty -m "chore: ralph blocked, no changes made (#${ISSUE_NUMBER})"
 elif [ "$COMMITS" -eq 0 ]; then
   say "No commits produced — nothing to open a PR for."
-  gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
+  tracker_comment "$ISSUE_NUMBER" "$(cat <<EOF
 🤖 **Ralph made no changes.**
 
 The agent ran but produced no commits.$( [ "$TIMED_OUT" = true ] && echo " It hit the ${TIMEOUT_MINUTES}m budget first." )
@@ -335,7 +346,7 @@ ${SESSION_NOTE:-}
 
 [Run log](${RUN_URL}) · this issue keeps its current labels.
 EOF
-)" > /dev/null
+)"
   emit "status" "$STATUS"
   exit 0
 fi
@@ -368,7 +379,7 @@ ASSUMPTIONS=""
 [ -f "$RALPH_DIR/ASSUMPTIONS.md" ] && ASSUMPTIONS="$(cat "$RALPH_DIR/ASSUMPTIONS.md")"
 
 {
-  echo "Closes #${ISSUE_NUMBER}"
+  tracker_closes_line "$ISSUE_NUMBER"
   echo
   [ "$BLOCKED" = true ] && { echo "## ⚠️ Blocked"; echo; echo "$BLOCKED_TEXT"; echo; }
   [ "$TIMED_OUT" = true ] && { echo "## ⚠️ Hit the time budget"; echo; echo "The agent was stopped after ${TIMEOUT_MINUTES} minutes. The work below may be incomplete."; echo; }
@@ -442,7 +453,7 @@ if ! PR_URL="$(gh pr create "${PR_ARGS[@]}" 2> "$WORK/pr-create.err")"; then
   # The work exists but the run did not deliver what it promises, so this is
   # a failure whatever the agent achieved. The branch output says where it is.
   emit "status" "failed"
-  gh issue comment "$ISSUE_NUMBER" --body "$(cat <<EOF
+  tracker_comment "$ISSUE_NUMBER" "$(cat <<EOF
 🤖 **Ralph finished, but could not open a pull request.**
 
 The work is pushed to \`${BRANCH}\` — [open a PR from it](${COMPARE_URL}). The PR description Ralph drafted is in the [run summary](${RUN_URL}).
@@ -454,7 +465,7 @@ ${PR_FIX:+
 ${PR_FIX}
 }
 EOF
-)" > /dev/null || say "warning: could not comment on issue #${ISSUE_NUMBER} either."
+)" || say "warning: could not comment on issue $(tracker_ref "$ISSUE_NUMBER") either."
   exit 1
 fi
 emit "status" "$STATUS"
@@ -465,7 +476,7 @@ emit "pr_url" "$PR_URL"
 # reads the same wall of text twice and then has to decide which copy to reply
 # to. Point at the PR instead and keep the conversation in one place.
 if [ "$BLOCKED" = true ]; then
-  gh issue comment "$ISSUE_NUMBER" --body "🤖 **Ralph is blocked** — ${PR_URL} has the reasoning and the options it sees." > /dev/null
+  tracker_comment "$ISSUE_NUMBER" "🤖 **Ralph is blocked** — ${PR_URL} has the reasoning and the options it sees."
 else
-  gh issue comment "$ISSUE_NUMBER" --body "🤖 **Ralph opened ${PR_URL}**$( [ "$PR_DRAFT" = "true" ] && echo " (draft — see the PR for why)" )" > /dev/null
+  tracker_comment "$ISSUE_NUMBER" "🤖 **Ralph opened ${PR_URL}**$( [ "$PR_DRAFT" = "true" ] && echo " (draft — see the PR for why)" )"
 fi
