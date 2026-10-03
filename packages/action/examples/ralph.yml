@@ -27,9 +27,9 @@ jobs:
       issues: write
 
     steps:
-      # v0 moves as fixes land and may break between releases.
-      # Pin a SHA if you need it to stay put.
-      - uses: dtun/ralph-alpha/packages/action@v0
+      # Version tags never move. Bump this to pick up fixes; the releases
+      # page says what changed. 0.x may break between minor versions.
+      - uses: dtun/ralph-alpha/packages/action@v0.1.1
         with:
           # The action checks out for you, so a step of your own would run
           # before the repo exists. Install dependencies here instead.

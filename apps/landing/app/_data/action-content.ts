@@ -257,5 +257,5 @@ export const statusContent = {
   heading: "Status",
   body: "Skills resolve in print mode, which was the assumption the design rested on. On a real self-hosted Mac runner, labelling an issue ready-for-agent has run every stage in sequence — pack install, brief, implement, verify — and ended in a draft pull request.",
   unverified:
-    "Still unobserved: CI on Ralph's pull requests, whether the output is worth reviewing across a sample of runs, and more than one runner. The tag stays v0 until the input names settle.",
+    "Still unobserved: CI on Ralph's pull requests, whether the output is worth reviewing across a sample of runs, and more than one runner. Ralph stays on 0.x until the input names settle.",
 };
