@@ -1,7 +1,7 @@
 export const headerContent = {
   brand: "Ralph Alpha",
   title: "Multiplayer AI Coding",
-  subtitle: "Your team's laptops. One AI-powered fleet.",
+  subtitle: "Spare cycles, everywhere. One AI-powered fleet.",
 };
 
 export const bigIdeaContent = {
